@@ -1,0 +1,3 @@
+# Offload Experimental File I/O to External Data Proxy
+
+Macromolecular crystallography experiments generate high-throughput streams of multi-gigabyte raw diffraction images, X-ray scans, and autoprocessing report files that must be previewed and downloaded by users. We decided not to store physical file paths in Django models or route file transfer streams through the Django application server, but instead delegate all file validation, packaging, and streaming to an independent service (`mxlive-dataproxy`) via ephemeral signed tokens. This keeps the web application stateless and responsive, prevents high-volume downloads from starving web workers, and decouples local filesystem topology from LIMS records.

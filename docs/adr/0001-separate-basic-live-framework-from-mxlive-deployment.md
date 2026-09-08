@@ -1,0 +1,3 @@
+# Separate Reusable basic-live Framework from mxlive Deployment
+
+MxLIVE was originally developed as a monolithic synchrotron LIMS containing both general-purpose beamline operations management and CMCF-specific macromolecular crystallography workflows. We decided to extract the core domain models, scheduling, ACL, publications, and API primitives into an independent, reusable framework package (`basic-live`), leaving `mxlive` strictly as the site deployment configuration, custom asset bundle, and MX-specialized station layer. This separation enables other beamline disciplines and light source facilities to adopt the LIMS engine without inheriting MX-specific constraints or CLS-specific facility infrastructure.

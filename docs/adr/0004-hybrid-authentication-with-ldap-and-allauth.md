@@ -1,0 +1,3 @@
+# Hybrid Authentication with Facility LDAP and Extensible django-allauth
+
+User authentication at the facility relies on centralized POSIX LDAP directories with automatic staff and superuser privilege synchronization based on GID and GECOS data. We decided to combine LDAP authentication with `django-allauth` to enable modern federated authentication providers (such as ORCID and Microsoft Entra ID) without replacing or disrupting the facility directory sync. This allows external academic researchers and remote collaborators to log in via standard academic and enterprise identities while preserving local LDAP directory authority for on-premises beamline access and staff administration.

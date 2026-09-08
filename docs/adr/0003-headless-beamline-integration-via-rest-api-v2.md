@@ -1,0 +1,3 @@
+# Headless Beamline Automation Integration via REST API v2
+
+Data collection stations running beamline control software (MxDC) require bidirectional communication with MxLIVE to retrieve mounted sample coordinates, manage active experimental sessions, and ingest dataset metadata and autoprocessing reports. We decided to conduct all integration strictly across a versioned REST API (`/api/v2/`) authenticated using project verification keys, rejecting direct database access or shared filesystem polling. This guarantees clean API contract boundaries, maintains an auditable session log, and isolates beamline control networks from web database credentials.
