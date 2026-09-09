@@ -139,14 +139,12 @@ USE_L10N = True
 USE_TZ = True
 
 # Static files (CSS, JavaScript, Images)
-# https://docs.djangoproject.com/en/2.2/howto/static-files/
-
 STATIC_URL = '/static/'
 STATIC_ROOT = BASE_DIR / 'static'
-ASSETS_ROOT = PROJECT_DIR / "static" / "assets"     # Location of 3rd party asset files
+BASICLIVE_ASSETS_ROOT = PROJECT_DIR / "static" / "assets"     # Location of 3rd party asset files
 STATICFILES_DIRS = [
     PROJECT_DIR / "static",
-    ASSETS_ROOT,
+    BASICLIVE_ASSETS_ROOT,
 ]
 
 MEDIA_URL = '/media/'
@@ -162,13 +160,13 @@ LDAP_MANAGER_SECRET = SECRET_KEY
 LDAP_USER_TABLE = 'ou=People'
 LDAP_USER_ROOT = '/home'
 LDAP_GROUP_TABLE = 'ou=Groups'
-LDAP_USER_SHELL ='/bin/bash'
+LDAP_USER_SHELL = '/bin/bash'
 LDAP_SEND_EMAILS = False
 LDAP_ADMIN_UIDS = [2000]
 
 # LDAP Authentication Settings
-LDAP_AUTH_URL = "ldap://{}:389".format(LDAP_SERVER_URI)
-LDAP_AUTH_SEARCH_BASE = "{}{}".format(LDAP_USER_TABLE, LDAP_BASE_DN)
+LDAP_AUTH_URL = f"ldap://{LDAP_SERVER_URI}:389"
+LDAP_AUTH_SEARCH_BASE = f"{LDAP_USER_TABLE}{LDAP_BASE_DN}"
 LDAP_AUTH_OBJECT_CLASS = "posixAccount"
 LDAP_AUTH_USER_LOOKUP_FIELDS = ("username",)
 LDAP_AUTH_USE_TLS = True
