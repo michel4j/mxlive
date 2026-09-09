@@ -5,6 +5,7 @@ from django.contrib.auth import get_user_model
 from django.core.exceptions import PermissionDenied
 from django.template.loader import render_to_string
 from django.template import Template, Context
+from django.urls import reverse, resolve
 
 from .registry import DashboardCard, CardRegistry, register_card, card_registry
 from . import cards
@@ -464,5 +465,31 @@ class TemplateRenderingTests(SimpleTestCase):
         }
         rendered = render_to_string('dashboard/staff_dashboard.html', context)
         self.assertIn('Staff', rendered)
+
+
+class DashboardURLRoutingTests(SimpleTestCase):
+
+    def test_named_url_reversing(self):
+        self.assertEqual(reverse('dashboard'), '/')
+        self.assertEqual(reverse('user-dashboard'), '/user/')
+        self.assertEqual(reverse('staff-dashboard'), '/staff/')
+
+    def test_url_resolving_root(self):
+        resolver_match = resolve('/')
+        self.assertEqual(resolver_match.func.view_class, DashboardIndexView)
+
+    def test_url_resolving_user(self):
+        resolver_match = resolve('/user/')
+        self.assertEqual(resolver_match.func.view_class, UserDashboardView)
+
+    def test_url_resolving_staff(self):
+        resolver_match = resolve('/staff/')
+        self.assertEqual(resolver_match.func.view_class, StaffDashboardView)
+
+    def test_url_resolving_dashboard_prefix(self):
+        self.assertEqual(resolve('/dashboard/').func.view_class, DashboardIndexView)
+        self.assertEqual(resolve('/dashboard/user/').func.view_class, UserDashboardView)
+        self.assertEqual(resolve('/dashboard/staff/').func.view_class, StaffDashboardView)
+
 
 

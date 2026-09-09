@@ -25,10 +25,9 @@ from django.contrib.staticfiles.urls import staticfiles_urlpatterns
 from django.urls import path
 
 from basiclive.core.lims.conf import settings as lims_settings
-from basiclive.core.lims.views import ProjectDetail, ProxyView
+from basiclive.core.lims.views import ProxyView
 
 urlpatterns = [
-    path('', login_required(ProjectDetail.as_view()), name='dashboard'),
     path('admin/', admin.site.urls, name='admin'),
     path('access/', include('basiclive.core.acl.urls')),
     path('users/',  include('basiclive.core.lims.urls')),
@@ -38,6 +37,8 @@ urlpatterns = [
     path('accounts/login/',  LoginView.as_view(template_name='lims/login.html'), name="login"),
     path('accounts/logout/', LogoutView.as_view(), name="logout"),
     path('api/v2/', include('basiclive.core.api.urls')),
+    path('dashboard/', include('mxlive.dashboard.urls')),
+    path('', include('mxlive.dashboard.urls')),
 ]
 
 if lims_settings.USE_SCHEDULE:
