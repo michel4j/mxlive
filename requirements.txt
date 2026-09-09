@@ -1,4 +1,4 @@
-basic-live
+basiclive
 psycopg2-binary
 python-dotenv
 pymemcache
