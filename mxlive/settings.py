@@ -52,7 +52,7 @@ INSTALLED_APPS = [
     'basiclive.core.publications',
 
     'crispy_forms',
-    'crispy_bootstrap4',
+    'crispy_bootstrap5',
 
     'mxlive.dashboard',
 ]
@@ -173,7 +173,8 @@ LDAP_AUTH_OBJECT_CLASS = "posixAccount"
 LDAP_AUTH_USER_LOOKUP_FIELDS = ("username",)
 LDAP_AUTH_USE_TLS = True
 
-CRISPY_TEMPLATE_PACK = 'bootstrap5'
+CRISPY_ALLOWED_TEMPLATE_PACKS = "bootstrap5"
+CRISPY_TEMPLATE_PACK = "bootstrap5"
 
 BASICLIVE_LIMS = {
     'APP_NAME': 'MxLIVE',
