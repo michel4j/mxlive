@@ -1,0 +1,8 @@
+<div class="card mb-4 {{ card_class }}">
+    {% if card.title or title %}
+    <div class="card-header p-1 text-center text-wide text-muted">
+        <small>{{ card.title|default:title }}</small>
+    </div>
+    {% endif %}
+    {% block card_content %}{% endblock %}
+</div>

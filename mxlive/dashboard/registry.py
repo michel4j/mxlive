@@ -18,30 +18,34 @@ class DashboardCard:
     def __init__(self):
         if not self.name:
             self.name = self.__class__.__name__.lower()
+        self.request = None
 
     def is_visible(self, request):
         """
         Determine if the card should be displayed for the given request.
         Override to implement custom permissions or configuration checks.
         """
-        if not request or not request.user.is_authenticated:
+        req = request or self.request
+        if not req or not getattr(req, 'user', None) or not req.user.is_authenticated:
             return False
 
-        is_superuser = getattr(request.user, 'is_superuser', False)
+        is_superuser = getattr(req.user, 'is_superuser', False)
         if 'staff' in self.roles and is_superuser:
             return True
         if 'user' in self.roles and not is_superuser:
             return True
         return False
 
-    def get_context_data(self, request, **kwargs):
+    def get_context_data(self, request=None, **kwargs):
         """
         Return the context data required to render this card.
         """
+        req = request or self.request
         context = {
             'card': self,
             'name': self.name,
             'title': self.title,
+            'request': req,
         }
         context.update(kwargs)
         return context
@@ -53,11 +57,12 @@ class DashboardCard:
         if not self.template_name:
             return mark_safe('')
 
-        card_context = self.get_context_data(request)
+        req = request or self.request
+        card_context = self.get_context_data(req)
         if context:
             card_context.update(context)
 
-        return mark_safe(render_to_string(self.template_name, card_context, request=request))
+        return mark_safe(render_to_string(self.template_name, card_context, request=req))
 
     def __repr__(self):
         return f"<{self.__class__.__name__}: {self.name} (order={self.order})>"
@@ -119,6 +124,8 @@ class CardRegistry:
 
         if request is not None:
             cards = [c for c in cards if c.is_visible(request)]
+            for c in cards:
+                c.request = request
 
         cards.sort(key=lambda c: (c.order, c.name))
         return cards

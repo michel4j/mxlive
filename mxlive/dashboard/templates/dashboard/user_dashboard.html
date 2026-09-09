@@ -1,0 +1,54 @@
+{% extends "base.html" %}
+{% load icons %}
+{% load guides %}
+{% load msgs %}
+{% load settings %}
+{% load dashboard_tags %}
+
+{% block page_heading %}
+    <h3 class="text-condensed"> <span class="text-muted"><strong>{{ user.username|upper }}</strong> |</span> User</h3>
+    <span class="text-muted hidden-xs">
+        Start here to manage and monitor shipments, review recent sessions, view and download data, and much more.
+    </span>
+{% endblock %}
+
+{% block object_tools %}
+    <a href="#!" data-form-link="{% url 'shipment-new' %}">
+        {% show_icon label='New Shipment' icon='ti ti-md ti-plus' %}
+    </a>
+    {% include "lims/tools-user.html" %}
+{% endblock %}
+
+{% block full %}
+<div class="row">
+    {% if left_cards %}
+        <div class="col-12 col-md-3">
+            {% for card in left_cards %}
+                {% render_card card %}
+            {% endfor %}
+        </div>
+    {% endif %}
+
+    <div class="col-12 {% if left_cards %}col-md-6{% else %}col-sm-8{% endif %}">
+        {% for card in center_cards %}
+            {% render_card card %}
+        {% endfor %}
+    </div>
+
+    <div class="col-12 {% if left_cards %}col-md-3{% else %}col-sm-4{% endif %}">
+        {% for card in right_cards %}
+            {% render_card card %}
+        {% endfor %}
+    </div>
+</div>
+
+{% if full_cards %}
+<div class="row mt-3">
+    <div class="col-12">
+        {% for card in full_cards %}
+            {% render_card card %}
+        {% endfor %}
+    </div>
+</div>
+{% endif %}
+{% endblock %}

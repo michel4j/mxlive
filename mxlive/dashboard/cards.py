@@ -17,9 +17,11 @@ class UpcomingBeamtimeCard(DashboardCard):
             return False
         return bool(lims_cfg.USE_SCHEDULE)
 
-    def get_context_data(self, request, **kwargs):
+    def get_context_data(self, request=None, **kwargs):
         context = super().get_context_data(request, **kwargs)
-        context['beamtimes'] = services.get_user_beamtimes(request.user)
+        req = request or self.request
+        user = getattr(req, 'user', None)
+        context['beamtimes'] = services.get_user_beamtimes(user) if user else []
         return context
 
 
@@ -32,9 +34,11 @@ class RecentShipmentsCard(DashboardCard):
     roles = ('user',)
     column = 'center'
 
-    def get_context_data(self, request, **kwargs):
+    def get_context_data(self, request=None, **kwargs):
         context = super().get_context_data(request, **kwargs)
-        context['shipments'] = services.get_user_shipments(request.user)
+        req = request or self.request
+        user = getattr(req, 'user', None)
+        context['shipments'] = services.get_user_shipments(user) if user else []
         return context
 
 
@@ -47,9 +51,11 @@ class RecentSessionsCard(DashboardCard):
     roles = ('user',)
     column = 'center'
 
-    def get_context_data(self, request, **kwargs):
+    def get_context_data(self, request=None, **kwargs):
         context = super().get_context_data(request, **kwargs)
-        context['sessions'] = services.get_user_sessions(request.user)
+        req = request or self.request
+        user = getattr(req, 'user', None)
+        context['sessions'] = services.get_user_sessions(user) if user else []
         return context
 
 
@@ -72,7 +78,7 @@ class BeamlinesCard(DashboardCard):
     roles = ('staff',)
     column = 'left'
 
-    def get_context_data(self, request, **kwargs):
+    def get_context_data(self, request=None, **kwargs):
         context = super().get_context_data(request, **kwargs)
         context['beamlines'] = services.get_staff_beamlines()
         return context
@@ -87,7 +93,7 @@ class AdaptorsCard(DashboardCard):
     roles = ('staff',)
     column = 'left'
 
-    def get_context_data(self, request, **kwargs):
+    def get_context_data(self, request=None, **kwargs):
         context = super().get_context_data(request, **kwargs)
         context['adaptors'] = services.get_staff_adaptors()
         return context
@@ -102,7 +108,7 @@ class ActiveConnectionsCard(DashboardCard):
     roles = ('staff',)
     column = 'center'
 
-    def get_context_data(self, request, **kwargs):
+    def get_context_data(self, request=None, **kwargs):
         context = super().get_context_data(request, **kwargs)
         context['connections'] = services.get_staff_active_connections()
         return context
@@ -117,7 +123,7 @@ class StaffShipmentsCard(DashboardCard):
     roles = ('staff',)
     column = 'center'
 
-    def get_context_data(self, request, **kwargs):
+    def get_context_data(self, request=None, **kwargs):
         context = super().get_context_data(request, **kwargs)
         context['shipments'] = services.get_staff_shipments()
         return context
@@ -137,7 +143,7 @@ class LocalContactCard(DashboardCard):
             return False
         return bool(lims_cfg.USE_CRM)
 
-    def get_context_data(self, request, **kwargs):
+    def get_context_data(self, request=None, **kwargs):
         context = super().get_context_data(request, **kwargs)
         context['support'] = services.get_today_beamline_support()
         return context

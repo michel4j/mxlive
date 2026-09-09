@@ -3,6 +3,8 @@ from django.apps import apps
 from django.test import SimpleTestCase, RequestFactory
 from django.contrib.auth import get_user_model
 from django.core.exceptions import PermissionDenied
+from django.template.loader import render_to_string
+from django.template import Template, Context
 
 from .registry import DashboardCard, CardRegistry, register_card, card_registry
 from . import cards
@@ -343,3 +345,124 @@ class DashboardViewsTests(SimpleTestCase):
 
         response = DashboardIndexView.as_view()(request)
         mock_render.assert_called_once()
+
+
+class TemplateRenderingTests(SimpleTestCase):
+
+    def setUp(self):
+        self.factory = RequestFactory()
+        User = get_user_model()
+        self.regular_user = User(username='testuser', is_superuser=False)
+        self.staff_user = User(username='staffuser', is_superuser=True)
+
+    def test_render_base_card(self):
+        rendered = render_to_string('dashboard/cards/base_card.html', {'title': 'Base Title'})
+        self.assertIn('Base Title', rendered)
+
+    @patch('basiclive.core.lims.models.Guide.objects.all')
+    def test_render_user_guide_card(self, mock_guides):
+        mock_guides.return_value = []
+        card = card_registry.get_card('user_guide')
+        rendered = card.render()
+        self.assertIsInstance(rendered, str)
+
+    @patch('mxlive.dashboard.services.get_user_shipments')
+    def test_render_recent_shipments_card(self, mock_shipments):
+        mock_shipments.return_value = []
+        card = card_registry.get_card('recent_shipments')
+        request = self.factory.get('/')
+        request.user = self.regular_user
+        rendered = card.render(request=request)
+        self.assertIn('RECENT SHIPMENTS', rendered)
+        self.assertIn('Start Now', rendered)
+
+    @patch('mxlive.dashboard.services.get_user_sessions')
+    def test_render_recent_sessions_card_empty(self, mock_sessions):
+        mock_sessions.return_value = []
+        card = card_registry.get_card('recent_sessions')
+        request = self.factory.get('/')
+        request.user = self.regular_user
+        rendered = card.render(request=request)
+        self.assertEqual(rendered.strip(), '')
+
+    @patch('mxlive.dashboard.services.get_user_beamtimes')
+    def test_render_upcoming_beamtime_card_empty(self, mock_beamtimes):
+        mock_beamtimes.return_value = []
+        card = card_registry.get_card('upcoming_beamtime')
+        request = self.factory.get('/')
+        request.user = self.regular_user
+        rendered = card.render(request=request)
+        self.assertEqual(rendered.strip(), '')
+
+    @patch('mxlive.dashboard.services.get_staff_active_connections')
+    def test_render_active_connections_card_empty(self, mock_conns):
+        mock_conns.return_value = []
+        card = card_registry.get_card('active_connections')
+        request = self.factory.get('/')
+        request.user = self.staff_user
+        rendered = card.render(request=request)
+        self.assertIn('ACTIVE CONNECTIONS', rendered)
+        self.assertIn('No active connections at the moment.', rendered)
+
+    @patch('mxlive.dashboard.services.get_staff_shipments')
+    def test_render_staff_shipments_card(self, mock_shipments):
+        mock_shipments.return_value = []
+        card = card_registry.get_card('staff_shipments')
+        request = self.factory.get('/')
+        request.user = self.staff_user
+        rendered = card.render(request=request)
+        self.assertIn('SHIPMENTS', rendered)
+        self.assertIn('Start Now', rendered)
+
+    @patch('mxlive.dashboard.services.get_staff_adaptors')
+    def test_render_adaptors_card(self, mock_adaptors):
+        mock_adaptors.return_value = []
+        card = card_registry.get_card('adaptors')
+        request = self.factory.get('/')
+        request.user = self.staff_user
+        rendered = card.render(request=request)
+        self.assertIn('ADAPTORS', rendered)
+
+    @patch('mxlive.dashboard.services.get_staff_beamlines')
+    def test_render_beamlines_card(self, mock_beamlines):
+        mock_beamlines.return_value = []
+        card = card_registry.get_card('beamlines')
+        request = self.factory.get('/')
+        request.user = self.staff_user
+        rendered = card.render(request=request)
+        self.assertIn('BEAMLINES', rendered)
+
+    @patch('mxlive.dashboard.services.get_user_shipments')
+    def test_render_card_templatetag(self, mock_shipments):
+        mock_shipments.return_value = []
+        card = card_registry.get_card('recent_shipments')
+        request = self.factory.get('/')
+        request.user = self.regular_user
+        t = Template('{% load dashboard_tags %}{% render_card card %}')
+        rendered = t.render(Context({'card': card, 'request': request}))
+        self.assertIn('RECENT SHIPMENTS', rendered)
+
+    def test_render_user_dashboard_template(self):
+        context = {
+            'user': self.regular_user,
+            'left_cards': [],
+            'center_cards': [],
+            'right_cards': [],
+            'full_cards': [],
+        }
+        rendered = render_to_string('dashboard/user_dashboard.html', context)
+        self.assertIn('User', rendered)
+
+    def test_render_staff_dashboard_template(self):
+        context = {
+            'user': self.staff_user,
+            'access_types': [],
+            'left_cards': [],
+            'center_cards': [],
+            'right_cards': [],
+            'full_cards': [],
+        }
+        rendered = render_to_string('dashboard/staff_dashboard.html', context)
+        self.assertIn('Staff', rendered)
+
+

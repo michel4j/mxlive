@@ -1,0 +1,100 @@
+{% extends "base.html" %}
+{% load static %}
+{% load guides %}
+{% load icons %}
+{% load settings %}
+{% load dashboard_tags %}
+
+{% block extra_css %}
+    <style>
+        {% for kind in access_types %}
+            .{{kind.name}} {
+              position: relative;
+            }
+            .{{kind.name}}:before {
+              content: "";
+              height: 100%;
+              width: 7px;
+              background-color: {{kind.color}};
+              position: absolute;
+              left: 0;
+              top: 0;
+            }
+        {% endfor %}
+    </style>
+{% endblock %}
+
+{% block pre_js %}
+    <script src="{% static 'd3/js/d3.min.js' %}"></script>
+    <script src="{% static 'd3/js/d3-selection-multi.v1.min.js' %}"></script>
+    <script type="text/javascript" src="{% static 'lims/js/mxlive-layouts.min.js' %}"></script>
+{% endblock %}
+
+{% block page_heading %}
+    <h3 class="text-condensed"> <span class="text-muted"><strong>{{ user.username|upper }}</strong> |</span> Staff </h3>
+    <span class="text-muted text-condensed hidden-xs">Start here to manage shipments, load containers on a beamline, view data, and more.</span>
+{% endblock %}
+
+{% block object_tools %}
+    {% if USE_ACL %}
+        <a href="{% url 'access-list' %}">
+            {% show_icon label="Access" icon="ti ti-md ti-rss-alt" %}
+        </a>
+    {% endif %}
+    <a href="{% url 'session-list' %}">
+        {% show_icon label="Sessions" icon="ti ti-md ti-calendar" %}
+    </a>
+    <a href="{% url 'user-list' %}">
+        {% show_icon label="Accounts" icon="ti ti-md ti-user" %}
+    </a>
+
+    {% if USE_SCHEDULE %}
+        <a href="{% url 'schedule' %}">
+            {% show_icon label="Schedule" icon="ti ti-md ti-time" %}
+        </a>
+    {% endif %}
+    {% if USE_PUBLICATIONS %}
+        <a href="{% url 'pub-entry-list' %}">
+            {% show_icon label="Publications" icon="ti ti-md ti-layout-list-post" %}
+        </a>
+    {% endif %}
+    {% if USE_CRM %}
+        <a href="{% url 'supportrecord-list' %}" title="User Support">
+            {% show_icon label="Support" icon="ti ti-md ti-headphone-alt" %}
+        </a>
+    {% endif %}
+    <div class="separator"></div>
+    <a href="#!" data-form-link="{% url 'new-guide' %}" title="Create Guide">
+        {% show_icon label="Add Guide" icon="ti ti-md ti-agenda" %}
+    </a>
+{% endblock %}
+
+{% block full %}
+    <div class="row">
+        <div class="col-12 col-sm-6 col-md-3">
+            {% for card in left_cards %}
+                {% render_card card %}
+            {% endfor %}
+        </div>
+        <div class="col-12 col-sm-6">
+            {% for card in center_cards %}
+                {% render_card card %}
+            {% endfor %}
+        </div>
+        <div class="col-12 col-md-3">
+            {% for card in right_cards %}
+                {% render_card card %}
+            {% endfor %}
+        </div>
+    </div>
+
+    {% if full_cards %}
+    <div class="row mt-3">
+        <div class="col-12">
+            {% for card in full_cards %}
+                {% render_card card %}
+            {% endfor %}
+        </div>
+    </div>
+    {% endif %}
+{% endblock %}

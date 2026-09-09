@@ -1,0 +1,22 @@
+<div class="card mb-4">
+    <div class="card-header p-1 text-center text-wide text-muted"><small>RECENT SHIPMENTS</small></div>
+    <div class="list-group list-group-flush">
+        <div class="list-group-item empty p-2">
+            <a href="#!" data-form-link="{% url 'shipment-new' %}" class="d-flex flex-row">
+                <div class="box-status">
+                    <div class="text-center text-muted">
+                        <div title="Create a Shipment" class="ti ti-md ti-plus"></div>
+                        <div><small>Start Now</small></div>
+                    </div>
+                </div>
+                <div class="pl-3 overflow-ellipsis flex-shrink-1 align-self-center">
+                    <h4 class="p-0 m-0 text-condensed">Click here to start a new shipment!</h4>
+                    <span>Follow the steps to enter your sample information</span>
+                </div>
+            </a>
+        </div>
+        {% for shipment in shipments %}
+            {% include "lims/entries/shipment-list-item.html" %}
+        {% endfor %}
+    </div>
+</div>

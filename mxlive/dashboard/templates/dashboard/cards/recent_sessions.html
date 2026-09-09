@@ -1,0 +1,12 @@
+{% if sessions %}
+<div class="card mb-4">
+    <div class="card-header p-1 text-center text-wide text-muted">
+        <small>RECENT SESSIONS</small>
+    </div>
+    <div class="list-group list-group-flush">
+        {% for session in sessions %}
+            {% include "lims/entries/session-list-item.html" %}
+        {% endfor %}
+    </div>
+</div>
+{% endif %}

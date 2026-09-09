@@ -1,0 +1,12 @@
+<div class="card mb-4">
+    <div class="card-header p-1 text-center text-wide text-muted"><small>ACTIVE CONNECTIONS</small></div>
+    <div class="list-group list-group-flush list-group-hover">
+    {% for connection in connections %}
+        {% include "acl/connection-list-item.html" %}
+    {% empty %}
+        <div class="list-group-item empty">
+            No active connections at the moment.
+        </div>
+    {% endfor %}
+    </div>
+</div>
