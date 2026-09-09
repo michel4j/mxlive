@@ -2,7 +2,7 @@
     <div class="card-header p-1 text-center text-wide text-muted"><small>SHIPMENTS</small></div>
     <div class="list-group list-group-flush">
         {% for shipment in shipments %}
-            {% include "lims/entries/shipment-list-item.html" %}
+            {% include "lims/details/shipment-list-item.html" %}
         {% endfor %}
         <div class="p-2 list-group-item empty">
             <a href="#!" data-form-link="{% url 'shipment-new' %}" class="d-flex flex-row">
