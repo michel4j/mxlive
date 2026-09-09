@@ -1,10 +1,10 @@
-from unittest.mock import MagicMock
+from unittest.mock import MagicMock, patch
 from django.apps import apps
 from django.test import SimpleTestCase, RequestFactory
 from django.contrib.auth import get_user_model
-from django.template import TemplateDoesNotExist
 
 from .registry import DashboardCard, CardRegistry, register_card, card_registry
+from . import cards
 
 
 class TestCardA(DashboardCard):
@@ -73,8 +73,8 @@ class DashboardRegistryTests(SimpleTestCase):
         self.registry.register(TestCardB)  # order=10
         self.registry.register(TestCardC)  # order=15
 
-        cards = self.registry.get_cards()
-        self.assertEqual([c.name for c in cards], ['test_card_b', 'test_card_c', 'test_card_a'])
+        cards_list = self.registry.get_cards()
+        self.assertEqual([c.name for c in cards_list], ['test_card_b', 'test_card_c', 'test_card_a'])
 
     def test_get_cards_role_filter(self):
         self.registry.register(TestCardA)  # user
@@ -106,21 +106,21 @@ class DashboardRegistryTests(SimpleTestCase):
         # Regular user request
         request = self.factory.get('/')
         request.user = self.regular_user
-        cards = self.registry.get_cards(request=request)
-        self.assertEqual([c.name for c in cards], ['test_card_c', 'test_card_a'])
+        cards_list = self.registry.get_cards(request=request)
+        self.assertEqual([c.name for c in cards_list], ['test_card_c', 'test_card_a'])
 
         # Staff user request
         request = self.factory.get('/')
         request.user = self.staff_user
-        cards = self.registry.get_cards(request=request)
-        self.assertEqual([c.name for c in cards], ['test_card_b', 'test_card_c'])
+        cards_list = self.registry.get_cards(request=request)
+        self.assertEqual([c.name for c in cards_list], ['test_card_b', 'test_card_c'])
 
     def test_visibility_with_anonymous_user(self):
         self.registry.register(TestCardA)
         request = self.factory.get('/')
         request.user = MagicMock(is_authenticated=False)
-        cards = self.registry.get_cards(request=request)
-        self.assertEqual(len(cards), 0)
+        cards_list = self.registry.get_cards(request=request)
+        self.assertEqual(len(cards_list), 0)
 
     def test_card_context_data(self):
         card = TestCardA()
@@ -137,3 +137,142 @@ class DashboardRegistryTests(SimpleTestCase):
         card = TestCardA()
         rendered = card.render()
         self.assertEqual(rendered, '')
+
+
+class CoreCardsTests(SimpleTestCase):
+
+    def setUp(self):
+        self.factory = RequestFactory()
+        User = get_user_model()
+        self.regular_user = User(username='testuser', is_superuser=False)
+        self.staff_user = User(username='staffuser', is_superuser=True)
+
+    def test_all_core_cards_registered(self):
+        expected_cards = {
+            'upcoming_beamtime',
+            'recent_shipments',
+            'recent_sessions',
+            'user_guide',
+            'beamlines',
+            'adaptors',
+            'active_connections',
+            'staff_shipments',
+            'local_contact',
+        }
+        for card_name in expected_cards:
+            self.assertIsNotNone(card_registry.get_card(card_name), f"Missing card: {card_name}")
+
+    @patch('mxlive.dashboard.services.get_user_beamtimes')
+    def test_upcoming_beamtime_card_context(self, mock_get_beamtimes):
+        mock_get_beamtimes.return_value = ['bt1', 'bt2']
+        card = card_registry.get_card('upcoming_beamtime')
+        request = self.factory.get('/')
+        request.user = self.regular_user
+
+        self.assertTrue(card.is_visible(request))
+        context = card.get_context_data(request)
+        self.assertEqual(context['beamtimes'], ['bt1', 'bt2'])
+
+    @patch('mxlive.dashboard.services.get_user_shipments')
+    def test_recent_shipments_card_context(self, mock_get_shipments):
+        mock_get_shipments.return_value = ['shipment1']
+        card = card_registry.get_card('recent_shipments')
+        request = self.factory.get('/')
+        request.user = self.regular_user
+
+        self.assertTrue(card.is_visible(request))
+        context = card.get_context_data(request)
+        self.assertEqual(context['shipments'], ['shipment1'])
+
+    @patch('mxlive.dashboard.services.get_user_sessions')
+    def test_recent_sessions_card_context(self, mock_get_sessions):
+        mock_get_sessions.return_value = ['session1']
+        card = card_registry.get_card('recent_sessions')
+        request = self.factory.get('/')
+        request.user = self.regular_user
+
+        self.assertTrue(card.is_visible(request))
+        context = card.get_context_data(request)
+        self.assertEqual(context['sessions'], ['session1'])
+
+    @patch('mxlive.dashboard.services.get_staff_beamlines')
+    def test_beamlines_card_context(self, mock_get_beamlines):
+        mock_get_beamlines.return_value = ['bl1']
+        card = card_registry.get_card('beamlines')
+        request = self.factory.get('/')
+        request.user = self.staff_user
+
+        self.assertTrue(card.is_visible(request))
+        context = card.get_context_data(request)
+        self.assertEqual(context['beamlines'], ['bl1'])
+
+    @patch('mxlive.dashboard.services.get_staff_adaptors')
+    def test_adaptors_card_context(self, mock_get_adaptors):
+        mock_get_adaptors.return_value = ['adaptor1']
+        card = card_registry.get_card('adaptors')
+        request = self.factory.get('/')
+        request.user = self.staff_user
+
+        self.assertTrue(card.is_visible(request))
+        context = card.get_context_data(request)
+        self.assertEqual(context['adaptors'], ['adaptor1'])
+
+    @patch('mxlive.dashboard.services.get_staff_active_connections')
+    def test_active_connections_card_context(self, mock_get_conns):
+        mock_get_conns.return_value = [{'user': 'u1'}]
+        card = card_registry.get_card('active_connections')
+        request = self.factory.get('/')
+        request.user = self.staff_user
+
+        self.assertTrue(card.is_visible(request))
+        context = card.get_context_data(request)
+        self.assertEqual(context['connections'], [{'user': 'u1'}])
+
+    @patch('mxlive.dashboard.services.get_staff_shipments')
+    def test_staff_shipments_card_context(self, mock_get_shipments):
+        mock_get_shipments.return_value = ['s1', 's2']
+        card = card_registry.get_card('staff_shipments')
+        request = self.factory.get('/')
+        request.user = self.staff_user
+
+        self.assertTrue(card.is_visible(request))
+        context = card.get_context_data(request)
+        self.assertEqual(context['shipments'], ['s1', 's2'])
+
+    @patch('mxlive.dashboard.services.get_today_beamline_support')
+    def test_local_contact_card_context(self, mock_get_support):
+        mock_get_support.return_value = 'staff_member'
+        card = card_registry.get_card('local_contact')
+        request = self.factory.get('/')
+        request.user = self.staff_user
+
+        self.assertTrue(card.is_visible(request))
+        context = card.get_context_data(request)
+        self.assertEqual(context['support'], 'staff_member')
+
+    def test_user_and_staff_cards_filtering(self):
+        request_user = self.factory.get('/')
+        request_user.user = self.regular_user
+
+        request_staff = self.factory.get('/')
+        request_staff.user = self.staff_user
+
+        user_cards = card_registry.get_cards(request=request_user)
+        staff_cards = card_registry.get_cards(request=request_staff)
+
+        user_card_names = [c.name for c in user_cards]
+        staff_card_names = [c.name for c in staff_cards]
+
+        self.assertIn('upcoming_beamtime', user_card_names)
+        self.assertIn('recent_shipments', user_card_names)
+        self.assertIn('recent_sessions', user_card_names)
+        self.assertIn('user_guide', user_card_names)
+        self.assertNotIn('beamlines', user_card_names)
+
+        self.assertIn('beamlines', staff_card_names)
+        self.assertIn('adaptors', staff_card_names)
+        self.assertIn('active_connections', staff_card_names)
+        self.assertIn('staff_shipments', staff_card_names)
+        self.assertIn('local_contact', staff_card_names)
+        self.assertIn('user_guide', staff_card_names)
+        self.assertNotIn('upcoming_beamtime', staff_card_names)
