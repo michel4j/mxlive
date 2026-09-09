@@ -15,7 +15,14 @@ class UpcomingBeamtimeCard(DashboardCard):
     def is_visible(self, request):
         if not super().is_visible(request):
             return False
-        return bool(lims_cfg.USE_SCHEDULE)
+        if not lims_cfg.USE_SCHEDULE:
+            return False
+        req = request or self.request
+        user = getattr(req, 'user', None)
+        if not user or not user.is_authenticated:
+            return False
+        beamtimes = services.get_user_beamtimes(user)
+        return beamtimes.exists() if hasattr(beamtimes, 'exists') else bool(beamtimes)
 
     def get_context_data(self, request=None, **kwargs):
         context = super().get_context_data(request, **kwargs)

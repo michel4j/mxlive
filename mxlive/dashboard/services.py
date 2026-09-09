@@ -13,6 +13,8 @@ def get_user_shipments(user):
     - Returned shipments within the last 365 days
     Annotated with sample, report, dataset, group, and container counts.
     """
+    if not user or not getattr(user, 'pk', None):
+        return []
     now = timezone.now()
     one_year_ago = now - timedelta(days=365)
     return user.shipments.filter(
@@ -31,6 +33,8 @@ def get_user_beamtimes(user):
     """
     Retrieve upcoming and current beamtimes for the user if scheduling is enabled.
     """
+    if not user or not getattr(user, 'pk', None):
+        return []
     if not lims_cfg.USE_SCHEDULE:
         return []
 
@@ -56,6 +60,8 @@ def get_user_sessions(user, limit=7):
     """
     Retrieve recent sessions for the user (last 365 days) up to limit (default 7).
     """
+    if not user or not getattr(user, 'pk', None):
+        return []
     now = timezone.now()
     one_year_ago = now - timedelta(days=365)
     return user.sessions.filter(

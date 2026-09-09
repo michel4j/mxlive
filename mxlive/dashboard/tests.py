@@ -109,17 +109,23 @@ class DashboardRegistryTests(SimpleTestCase):
         self.registry.register(TestCardB)  # staff
         self.registry.register(TestCardC)  # user, staff
 
-        # Regular user request
+        # Regular user request (can only see non-staff-only cards)
         request = self.factory.get('/')
         request.user = self.regular_user
         cards_list = self.registry.get_cards(request=request)
         self.assertEqual([c.name for c in cards_list], ['test_card_c', 'test_card_a'])
 
-        # Staff user request
+        # Staff user request (can see all cards, or filtered by role)
         request = self.factory.get('/')
         request.user = self.staff_user
         cards_list = self.registry.get_cards(request=request)
-        self.assertEqual([c.name for c in cards_list], ['test_card_b', 'test_card_c'])
+        self.assertEqual([c.name for c in cards_list], ['test_card_b', 'test_card_c', 'test_card_a'])
+
+        staff_cards = self.registry.get_cards(request=request, role='staff')
+        self.assertEqual([c.name for c in staff_cards], ['test_card_b', 'test_card_c'])
+
+        user_cards = self.registry.get_cards(request=request, role='user')
+        self.assertEqual([c.name for c in user_cards], ['test_card_c', 'test_card_a'])
 
     def test_visibility_with_anonymous_user(self):
         self.registry.register(TestCardA)
@@ -256,15 +262,17 @@ class CoreCardsTests(SimpleTestCase):
         context = card.get_context_data(request)
         self.assertEqual(context['support'], 'staff_member')
 
-    def test_user_and_staff_cards_filtering(self):
+    @patch('mxlive.dashboard.services.get_user_beamtimes')
+    def test_user_and_staff_cards_filtering(self, mock_bt):
+        mock_bt.return_value = [MagicMock()]
         request_user = self.factory.get('/')
         request_user.user = self.regular_user
 
         request_staff = self.factory.get('/')
         request_staff.user = self.staff_user
 
-        user_cards = card_registry.get_cards(request=request_user)
-        staff_cards = card_registry.get_cards(request=request_staff)
+        user_cards = card_registry.get_cards(request=request_user, role='user')
+        staff_cards = card_registry.get_cards(request=request_staff, role='staff')
 
         user_card_names = [c.name for c in user_cards]
         staff_card_names = [c.name for c in staff_cards]
@@ -499,8 +507,9 @@ class DashboardSecurityAndRoutingTests(SimpleTestCase):
         self.factory = RequestFactory()
         User = get_user_model()
         self.anonymous_user = AnonymousUser()
-        self.regular_user = User(username='testuser', is_superuser=False)
-        self.staff_user = User(username='staffuser', is_superuser=True)
+        self.regular_user = User(username='testuser', is_superuser=False, is_staff=False, pk=1)
+        self.staff_user = User(username='staffuser', is_superuser=True, is_staff=True, pk=2)
+        self.non_su_staff = User(username='staff_scientist', is_superuser=False, is_staff=True, pk=3)
 
     def test_anonymous_user_on_root_redirects_to_login(self):
         request = self.factory.get('/')
@@ -602,6 +611,103 @@ class DashboardSecurityAndRoutingTests(SimpleTestCase):
         response = StaffDashboardView.as_view()(request)
         self.assertEqual(response.status_code, 200)
         self.assertIn('dashboard/staff_dashboard.html', response.template_name)
+
+    @patch('mxlive.dashboard.services.get_user_shipments')
+    @patch('mxlive.dashboard.services.get_user_sessions')
+    @patch('mxlive.dashboard.services.get_user_beamtimes')
+    def test_non_su_staff_on_root_dispatches_to_user_dashboard(self, mock_bt, mock_sess, mock_ship):
+        """
+        Users with is_staff=True but is_superuser=False (such as beamline scientists)
+        should be dispatched to UserDashboardView on root '/', showing user cards.
+        """
+        mock_bt.return_value = []
+        mock_sess.return_value = []
+        mock_ship.return_value = []
+
+        request = self.factory.get('/')
+        request.user = self.non_su_staff
+        response = DashboardIndexView.as_view()(request)
+        self.assertEqual(response.status_code, 200)
+        self.assertIn('dashboard/user_dashboard.html', response.template_name)
+        card_names = [c.name for c in response.context_data['cards']]
+        self.assertIn('recent_shipments', card_names)
+        self.assertIn('recent_sessions', card_names)
+        self.assertIn('user_guide', card_names)
+        self.assertNotIn('beamlines', card_names)
+
+    @patch('mxlive.dashboard.services.get_user_shipments')
+    @patch('mxlive.dashboard.services.get_user_sessions')
+    @patch('mxlive.dashboard.services.get_user_beamtimes')
+    def test_superuser_on_user_url_renders_user_cards(self, mock_bt, mock_sess, mock_ship):
+        """
+        Superusers navigating to '/user/' must see user dashboard cards
+        (recent shipments, recent sessions, user guide), not just user guide.
+        """
+        mock_bt.return_value = []
+        mock_sess.return_value = []
+        mock_ship.return_value = []
+
+        request = self.factory.get('/user/')
+        request.user = self.staff_user
+        response = UserDashboardView.as_view()(request)
+        self.assertEqual(response.status_code, 200)
+        self.assertIn('dashboard/user_dashboard.html', response.template_name)
+        card_names = [c.name for c in response.context_data['cards']]
+        self.assertIn('recent_shipments', card_names)
+        self.assertIn('recent_sessions', card_names)
+        self.assertIn('user_guide', card_names)
+
+    @patch('mxlive.dashboard.services.get_staff_beamlines')
+    @patch('mxlive.dashboard.services.get_staff_adaptors')
+    @patch('mxlive.dashboard.services.get_staff_active_connections')
+    @patch('mxlive.dashboard.services.get_staff_shipments')
+    @patch('mxlive.dashboard.services.get_today_beamline_support')
+    def test_non_su_staff_on_staff_url_renders_staff_dashboard(self, mock_sup, mock_ship, mock_conn, mock_adapt, mock_bl):
+        """
+        Users with is_staff=True are allowed to view the Staff dashboard on '/staff/'.
+        """
+        mock_sup.return_value = None
+        mock_ship.return_value = []
+        mock_conn.return_value = []
+        mock_adapt.return_value = []
+        mock_bl.return_value = []
+
+        request = self.factory.get('/staff/')
+        request.user = self.non_su_staff
+        response = StaffDashboardView.as_view()(request)
+        self.assertEqual(response.status_code, 200)
+        self.assertIn('dashboard/staff_dashboard.html', response.template_name)
+        card_names = [c.name for c in response.context_data['cards']]
+        self.assertIn('beamlines', card_names)
+        self.assertIn('adaptors', card_names)
+        self.assertIn('active_connections', card_names)
+        self.assertIn('staff_shipments', card_names)
+
+    @patch('mxlive.dashboard.services.get_user_shipments')
+    @patch('mxlive.dashboard.services.get_user_sessions')
+    @patch('mxlive.dashboard.services.get_user_beamtimes')
+    def test_beamtime_card_visible_only_when_has_beamtime(self, mock_bt, mock_sess, mock_ship):
+        """
+        UpcomingBeamtimeCard is only visible when the user has upcoming beamtime,
+        preventing an empty 3-column whitespace on the left of user dashboard.
+        """
+        mock_sess.return_value = []
+        mock_ship.return_value = []
+
+        # When beamtimes is empty
+        mock_bt.return_value = []
+        request = self.factory.get('/user/')
+        request.user = self.regular_user
+        response = UserDashboardView.as_view()(request)
+        self.assertNotIn('upcoming_beamtime', [c.name for c in response.context_data['cards']])
+        self.assertEqual(len(response.context_data['left_cards']), 0)
+
+        # When user has beamtimes
+        mock_bt.return_value = [MagicMock()]
+        response2 = UserDashboardView.as_view()(request)
+        self.assertIn('upcoming_beamtime', [c.name for c in response2.context_data['cards']])
+        self.assertEqual(len(response2.context_data['left_cards']), 1)
+
 
 
 

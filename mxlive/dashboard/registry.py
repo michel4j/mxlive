@@ -29,12 +29,11 @@ class DashboardCard:
         if not req or not getattr(req, 'user', None) or not req.user.is_authenticated:
             return False
 
-        is_superuser = getattr(req.user, 'is_superuser', False)
-        if 'staff' in self.roles and is_superuser:
-            return True
-        if 'user' in self.roles and not is_superuser:
-            return True
-        return False
+        user = req.user
+        is_staff_or_superuser = getattr(user, 'is_superuser', False) or getattr(user, 'is_staff', False)
+        if 'staff' in self.roles and 'user' not in self.roles:
+            return is_staff_or_superuser
+        return True
 
     def get_context_data(self, request=None, **kwargs):
         """

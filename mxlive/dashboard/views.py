@@ -64,6 +64,6 @@ class DashboardIndexView(LoginRequiredMixin, View):
         if not request.user.is_authenticated:
             return self.handle_no_permission()
 
-        if request.user.is_superuser or request.user.is_staff:
+        if request.user.is_superuser:
             return StaffDashboardView.as_view()(request, *args, **kwargs)
         return UserDashboardView.as_view()(request, *args, **kwargs)
