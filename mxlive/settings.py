@@ -16,8 +16,6 @@ PROJECT_DIR = Path(__file__).parent
 BASE_DIR = PROJECT_DIR.parent
 LOCAL_DIR = BASE_DIR / 'local'
 
-APP_NAME = 'MxLIVE'
-
 
 # Quick-start development settings - unsuitable for production
 # See https://docs.djangoproject.com/en/2.2/howto/deployment/checklist/
@@ -29,7 +27,6 @@ SECRET_KEY = 'f-=u8g58(4+$1&!pu%zx%&)5u+le%_#90*q7)n-6iifo5x2r0p'
 DEBUG = True
 
 ALLOWED_HOSTS = ['*']
-INTERNAL_IPS = ['127.0.0.1']
 
 # Application definition
 
@@ -55,7 +52,9 @@ INSTALLED_APPS = [
     'basiclive.core.publications',
 
     'crispy_forms',
-    'crispy_bootstrap4'
+    'crispy_bootstrap4',
+
+    'mxlive.dashboard',
 ]
 
 
@@ -173,8 +172,6 @@ LDAP_AUTH_SEARCH_BASE = "{}{}".format(LDAP_USER_TABLE, LDAP_BASE_DN)
 LDAP_AUTH_OBJECT_CLASS = "posixAccount"
 LDAP_AUTH_USER_LOOKUP_FIELDS = ("username",)
 LDAP_AUTH_USE_TLS = True
-
-LIMS_LDAP_MANAGER = True
 
 CRISPY_TEMPLATE_PACK = 'bootstrap4'
 
