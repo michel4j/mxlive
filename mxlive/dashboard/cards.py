@@ -1,4 +1,4 @@
-from django.conf import settings
+from basiclive.core.lims.conf import settings as lims_cfg
 from .registry import DashboardCard, register_card
 from . import services
 
@@ -15,8 +15,7 @@ class UpcomingBeamtimeCard(DashboardCard):
     def is_visible(self, request):
         if not super().is_visible(request):
             return False
-        lims_cfg = getattr(settings, 'BASICLIVE_LIMS', {})
-        return lims_cfg.get('USE_SCHEDULE', True)
+        return bool(lims_cfg.USE_SCHEDULE)
 
     def get_context_data(self, request, **kwargs):
         context = super().get_context_data(request, **kwargs)
@@ -136,8 +135,7 @@ class LocalContactCard(DashboardCard):
     def is_visible(self, request):
         if not super().is_visible(request):
             return False
-        lims_cfg = getattr(settings, 'BASICLIVE_LIMS', {})
-        return lims_cfg.get('USE_CRM', True)
+        return bool(lims_cfg.USE_CRM)
 
     def get_context_data(self, request, **kwargs):
         context = super().get_context_data(request, **kwargs)

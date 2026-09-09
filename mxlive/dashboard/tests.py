@@ -2,9 +2,11 @@ from unittest.mock import MagicMock, patch
 from django.apps import apps
 from django.test import SimpleTestCase, RequestFactory
 from django.contrib.auth import get_user_model
+from django.core.exceptions import PermissionDenied
 
 from .registry import DashboardCard, CardRegistry, register_card, card_registry
 from . import cards
+from .views import BaseDashboardView, UserDashboardView, StaffDashboardView, DashboardIndexView
 
 
 class TestCardA(DashboardCard):
@@ -276,3 +278,68 @@ class CoreCardsTests(SimpleTestCase):
         self.assertIn('local_contact', staff_card_names)
         self.assertIn('user_guide', staff_card_names)
         self.assertNotIn('upcoming_beamtime', staff_card_names)
+
+
+class DashboardViewsTests(SimpleTestCase):
+
+    def setUp(self):
+        self.factory = RequestFactory()
+        User = get_user_model()
+        self.regular_user = User(username='testuser', is_superuser=False)
+        self.staff_user = User(username='staffuser', is_superuser=True)
+
+    def test_user_dashboard_view_context(self):
+        view = UserDashboardView()
+        request = self.factory.get('/')
+        request.user = self.regular_user
+        view.request = request
+
+        context = view.get_context_data()
+        self.assertIn('cards', context)
+        self.assertIn('left_cards', context)
+        self.assertIn('center_cards', context)
+        self.assertIn('right_cards', context)
+        self.assertIn('access_types', context)
+
+    def test_staff_dashboard_view_context(self):
+        view = StaffDashboardView()
+        request = self.factory.get('/')
+        request.user = self.staff_user
+        view.request = request
+
+        context = view.get_context_data()
+        self.assertIn('cards', context)
+        self.assertIn('left_cards', context)
+        self.assertIn('center_cards', context)
+        self.assertIn('right_cards', context)
+
+    def test_staff_dashboard_test_func(self):
+        view = StaffDashboardView()
+
+        # Regular user fails
+        request = self.factory.get('/')
+        request.user = self.regular_user
+        view.request = request
+        self.assertFalse(view.test_func())
+
+        # Staff user passes
+        request.user = self.staff_user
+        self.assertTrue(view.test_func())
+
+    @patch.object(UserDashboardView, 'render_to_response')
+    def test_dashboard_index_dispatches_user(self, mock_render):
+        mock_render.return_value = 'user_response'
+        request = self.factory.get('/')
+        request.user = self.regular_user
+
+        response = DashboardIndexView.as_view()(request)
+        mock_render.assert_called_once()
+
+    @patch.object(StaffDashboardView, 'render_to_response')
+    def test_dashboard_index_dispatches_staff(self, mock_render):
+        mock_render.return_value = 'staff_response'
+        request = self.factory.get('/')
+        request.user = self.staff_user
+
+        response = DashboardIndexView.as_view()(request)
+        mock_render.assert_called_once()

@@ -1,8 +1,8 @@
 from datetime import timedelta
-from django.conf import settings
 from django.db.models import Q, Count, Max, Case, When, Value, BooleanField
 from django.utils import timezone
 
+from basiclive.core.lims.conf import settings as lims_cfg
 from basiclive.core.lims import models as lims_models
 
 
@@ -31,8 +31,7 @@ def get_user_beamtimes(user):
     """
     Retrieve upcoming and current beamtimes for the user if scheduling is enabled.
     """
-    use_schedule = getattr(settings, 'BASICLIVE_LIMS', {}).get('USE_SCHEDULE', True)
-    if not use_schedule:
+    if not lims_cfg.USE_SCHEDULE:
         return []
 
     try:
@@ -107,9 +106,8 @@ def get_staff_active_connections():
     """
     Aggregate currently scheduled users, active sessions, and active remote connections.
     """
-    lims_cfg = getattr(settings, 'BASICLIVE_LIMS', {})
-    use_acl = lims_cfg.get('USE_ACL', True)
-    use_schedule = lims_cfg.get('USE_SCHEDULE', True)
+    use_acl = lims_cfg.USE_ACL
+    use_schedule = lims_cfg.USE_SCHEDULE
 
     try:
         from basiclive.core.acl.models import Access, AccessList
@@ -213,10 +211,9 @@ def get_staff_active_connections():
 
 def get_today_beamline_support():
     """
-    Retrieve today's scheduled beamline support staff member if schedule is enabled.
+    Retrieve today's scheduled beamline support staff member if schedule and CRM are enabled.
     """
-    lims_cfg = getattr(settings, 'BASICLIVE_LIMS', {})
-    if not lims_cfg.get('USE_SCHEDULE', True) or not lims_cfg.get('USE_CRM', True):
+    if not lims_cfg.USE_SCHEDULE or not lims_cfg.USE_CRM:
         return None
 
     try:
