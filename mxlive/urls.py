@@ -37,7 +37,6 @@ urlpatterns = [
     path('accounts/login/',  LoginView.as_view(template_name='lims/login.html'), name="login"),
     path('accounts/logout/', LogoutView.as_view(), name="logout"),
     path('api/v2/', include('basiclive.core.api.urls')),
-    path('dashboard/', include('mxlive.dashboard.urls')),
     path('', include('mxlive.dashboard.urls')),
 ]
 
