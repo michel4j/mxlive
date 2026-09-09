@@ -141,7 +141,7 @@ class LocalContactCard(DashboardCard):
     name = 'local_contact'
     title = 'LOCAL CONTACT'
     template_name = 'dashboard/cards/local_contact.html'
-    order = 50
+    order = 10
     roles = ('staff',)
     column = 'right'
 

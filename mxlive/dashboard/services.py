@@ -56,9 +56,11 @@ def get_user_beamtimes(user):
     ).order_by('-current', 'start')
 
 
-def get_user_sessions(user, limit=7):
+def get_user_sessions(user, limit: int = 7):
     """
     Retrieve recent sessions for the user (last 365 days) up to limit (default 7).
+    :param user: User object
+    :param limit: Number of sessions to return
     """
     if not user or not getattr(user, 'pk', None):
         return []
