@@ -2,6 +2,7 @@ from unittest.mock import MagicMock, patch
 from django.apps import apps
 from django.test import SimpleTestCase, RequestFactory
 from django.contrib.auth import get_user_model
+from django.contrib.auth.models import AnonymousUser
 from django.core.exceptions import PermissionDenied
 from django.template.loader import render_to_string
 from django.template import Template, Context
@@ -490,6 +491,118 @@ class DashboardURLRoutingTests(SimpleTestCase):
         self.assertEqual(resolve('/dashboard/').func.view_class, DashboardIndexView)
         self.assertEqual(resolve('/dashboard/user/').func.view_class, UserDashboardView)
         self.assertEqual(resolve('/dashboard/staff/').func.view_class, StaffDashboardView)
+
+
+class DashboardSecurityAndRoutingTests(SimpleTestCase):
+
+    def setUp(self):
+        self.factory = RequestFactory()
+        User = get_user_model()
+        self.anonymous_user = AnonymousUser()
+        self.regular_user = User(username='testuser', is_superuser=False)
+        self.staff_user = User(username='staffuser', is_superuser=True)
+
+    def test_anonymous_user_on_root_redirects_to_login(self):
+        request = self.factory.get('/')
+        request.user = self.anonymous_user
+        response = DashboardIndexView.as_view()(request)
+        self.assertEqual(response.status_code, 302)
+        self.assertTrue(response.url.startswith('/accounts/login/'))
+
+    def test_anonymous_user_on_user_dashboard_redirects_to_login(self):
+        request = self.factory.get('/user/')
+        request.user = self.anonymous_user
+        response = UserDashboardView.as_view()(request)
+        self.assertEqual(response.status_code, 302)
+        self.assertTrue(response.url.startswith('/accounts/login/'))
+
+    def test_anonymous_user_on_staff_dashboard_redirects_to_login(self):
+        request = self.factory.get('/staff/')
+        request.user = self.anonymous_user
+        response = StaffDashboardView.as_view()(request)
+        self.assertEqual(response.status_code, 302)
+        self.assertTrue(response.url.startswith('/accounts/login/'))
+
+    @patch('mxlive.dashboard.services.get_user_shipments')
+    @patch('mxlive.dashboard.services.get_user_sessions')
+    @patch('mxlive.dashboard.services.get_user_beamtimes')
+    def test_regular_user_on_root_renders_user_dashboard(self, mock_bt, mock_sess, mock_ship):
+        mock_bt.return_value = []
+        mock_sess.return_value = []
+        mock_ship.return_value = []
+
+        request = self.factory.get('/')
+        request.user = self.regular_user
+        response = DashboardIndexView.as_view()(request)
+        self.assertEqual(response.status_code, 200)
+        self.assertIn('dashboard/user_dashboard.html', response.template_name)
+        card_names = [c.name for c in response.context_data['cards']]
+        self.assertIn('recent_shipments', card_names)
+        self.assertIn('recent_sessions', card_names)
+        self.assertNotIn('beamlines', card_names)
+
+    @patch('mxlive.dashboard.services.get_user_shipments')
+    @patch('mxlive.dashboard.services.get_user_sessions')
+    @patch('mxlive.dashboard.services.get_user_beamtimes')
+    def test_regular_user_on_user_url_renders_user_dashboard(self, mock_bt, mock_sess, mock_ship):
+        mock_bt.return_value = []
+        mock_sess.return_value = []
+        mock_ship.return_value = []
+
+        request = self.factory.get('/user/')
+        request.user = self.regular_user
+        response = UserDashboardView.as_view()(request)
+        self.assertEqual(response.status_code, 200)
+        self.assertIn('dashboard/user_dashboard.html', response.template_name)
+
+    def test_regular_user_on_staff_dashboard_denied(self):
+        request = self.factory.get('/staff/')
+        request.user = self.regular_user
+        with self.assertRaises(PermissionDenied):
+            StaffDashboardView.as_view()(request)
+
+    @patch('mxlive.dashboard.services.get_staff_beamlines')
+    @patch('mxlive.dashboard.services.get_staff_adaptors')
+    @patch('mxlive.dashboard.services.get_staff_active_connections')
+    @patch('mxlive.dashboard.services.get_staff_shipments')
+    @patch('mxlive.dashboard.services.get_today_beamline_support')
+    def test_staff_user_on_root_renders_staff_dashboard(self, mock_sup, mock_ship, mock_conn, mock_adapt, mock_bl):
+        mock_sup.return_value = None
+        mock_ship.return_value = []
+        mock_conn.return_value = []
+        mock_adapt.return_value = []
+        mock_bl.return_value = []
+
+        request = self.factory.get('/')
+        request.user = self.staff_user
+        response = DashboardIndexView.as_view()(request)
+        self.assertEqual(response.status_code, 200)
+        self.assertIn('dashboard/staff_dashboard.html', response.template_name)
+        card_names = [c.name for c in response.context_data['cards']]
+        self.assertIn('beamlines', card_names)
+        self.assertIn('adaptors', card_names)
+        self.assertIn('active_connections', card_names)
+        self.assertIn('staff_shipments', card_names)
+        self.assertNotIn('upcoming_beamtime', card_names)
+
+    @patch('mxlive.dashboard.services.get_staff_beamlines')
+    @patch('mxlive.dashboard.services.get_staff_adaptors')
+    @patch('mxlive.dashboard.services.get_staff_active_connections')
+    @patch('mxlive.dashboard.services.get_staff_shipments')
+    @patch('mxlive.dashboard.services.get_today_beamline_support')
+    def test_staff_user_on_staff_url_renders_staff_dashboard(self, mock_sup, mock_ship, mock_conn, mock_adapt, mock_bl):
+        mock_sup.return_value = None
+        mock_ship.return_value = []
+        mock_conn.return_value = []
+        mock_adapt.return_value = []
+        mock_bl.return_value = []
+
+        request = self.factory.get('/staff/')
+        request.user = self.staff_user
+        response = StaffDashboardView.as_view()(request)
+        self.assertEqual(response.status_code, 200)
+        self.assertIn('dashboard/staff_dashboard.html', response.template_name)
+
 
 
 
