@@ -17,7 +17,7 @@
                 </div>
                 <div class="tools-box ms-auto">
                     {% if USE_CRM %}
-                    <a href="#!" data-form-link="{% url 'new-supportrecord' %}" title="Record User Support">
+                    <a href="#!" data-modal-url="{% url 'new-supportrecord' %}" title="Record User Support">
                         {% show_icon label='Support' icon='ti ti-md ti-headphone-alt' badge='+' color='primary' %}
                     </a>
                     {% endif %}

@@ -13,7 +13,7 @@
 {% endblock %}
 
 {% block object_tools %}
-    <a href="#!" data-form-link="{% url 'shipment-new' %}">
+    <a href="#!" data-modal-url="{% url 'shipment-new' %}">
         {% show_icon label='New Shipment' icon='ti ti-md ti-plus' %}
     </a>
     {% include "lims/tools-user.html" %}

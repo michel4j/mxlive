@@ -5,7 +5,7 @@
             {% include "lims/details/shipment-list-item.html" %}
         {% endfor %}
         <div class="p-2 list-group-item empty">
-            <a href="#!" data-form-link="{% url 'shipment-new' %}" class="d-flex flex-row">
+            <a href="#!" data-modal-url="{% url 'shipment-new' %}" class="d-flex flex-row">
                 <div class="box-status">
                     <div class="text-center text-muted">
                         <div title="Create a Shipment" class="ti ti-md ti-plus"></div>
