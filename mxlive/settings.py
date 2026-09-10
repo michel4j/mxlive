@@ -51,8 +51,9 @@ INSTALLED_APPS = [
     'basiclive.core.crm',
     'basiclive.core.publications',
 
-    'crispy_forms',
-    'crispy_bootstrap5',
+    "crispy_forms",
+    "crispy_bootstrap5",
+    "crisp_modals",
 
     'mxlive.dashboard',
 ]
@@ -151,6 +152,8 @@ MEDIA_URL = '/media/'
 MEDIA_ROOT = BASE_DIR / 'local' / 'media'
 LOGIN_REDIRECT_URL = '/'
 LOGOUT_REDIRECT_URL = '/'
+CRISPY_ALLOWED_TEMPLATE_PACKS = "bootstrap5"
+CRISPY_TEMPLATE_PACK = "bootstrap5"
 
 # LDAP Server Settings
 LDAP_BASE_DN = 'dc=demo1,dc=freeipa,dc=org'
@@ -170,9 +173,6 @@ LDAP_AUTH_SEARCH_BASE = f"{LDAP_USER_TABLE}{LDAP_BASE_DN}"
 LDAP_AUTH_OBJECT_CLASS = "posixAccount"
 LDAP_AUTH_USER_LOOKUP_FIELDS = ("username",)
 LDAP_AUTH_USE_TLS = True
-
-CRISPY_ALLOWED_TEMPLATE_PACKS = "bootstrap5"
-CRISPY_TEMPLATE_PACK = "bootstrap5"
 
 BASICLIVE_LIMS = {
     'APP_NAME': 'MxLIVE',
