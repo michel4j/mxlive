@@ -66,7 +66,7 @@ requires-dist = [
     { name = "django", specifier = ">=6.1.1" },
     { name = "django-cas-ng", marker = "extra == 'cas'" },
     { name = "django-colorfield" },
-    { name = "django-crisp-modals", specifier = ">=2026.1.0" },
+    { name = "django-crisp-modals", specifier = ">=2026.1.2" },
     { name = "django-crispy-forms" },
     { name = "django-formtools" },
     { name = "django-itemlist", specifier = ">=2026.1.15" },
@@ -421,7 +421,7 @@ wheels = [
 
 [[package]]
 name = "django-crisp-modals"
-version = "2026.1.0"
+version = "2026.1.2"
 source = { registry = "https://pypi.org/simple" }
 dependencies = [
     { name = "crispy-bootstrap5" },
@@ -429,9 +429,9 @@ dependencies = [
     { name = "django-crispy-forms" },
     { name = "pyyaml" },
 ]
-sdist = { url = "https://files.pythonhosted.org/packages/68/4e/cae53b127367703a39e7b9f407e268ae22c939b88f13f28f6e270077d26b/django_crisp_modals-2026.1.0.tar.gz", hash = "sha256:da2cabe7b79be338ee30583f49933485447d10c7e7aaf7172719d4d73a23a80d", size = 13189, upload-time = "2026-01-23T18:11:02.025Z" }
+sdist = { url = "https://files.pythonhosted.org/packages/f7/56/25230380f7af5e96ea4b345f6eeb799531e920f76a9369ed3953bad66423/django_crisp_modals-2026.1.2.tar.gz", hash = "sha256:73ebb480c6af4d95da2aeb89efc0f4329431544147e01553cba5ef4f7190854a", size = 13209, upload-time = "2026-09-12T04:11:24.939Z" }
 wheels = [
-    { url = "https://files.pythonhosted.org/packages/2f/20/9b3c261f4a419c06de960c4397b8500efdc6191f8df875d88e15e150f491/django_crisp_modals-2026.1.0-py3-none-any.whl", hash = "sha256:3867a6d9880a18377869807188c1fe264ebe842f6b696a63f2c80f547b3434d1", size = 17016, upload-time = "2026-01-23T18:11:01.113Z" },
+    { url = "https://files.pythonhosted.org/packages/ed/aa/5c3c9e5e4033f2899a4093b197c83b8c3bad534705efd2a480ce63bf78ea/django_crisp_modals-2026.1.2-py3-none-any.whl", hash = "sha256:2935c5fce17865f640865fc4a611f1b4e98f2a843b797d19f2242a54aff5aeb0", size = 17028, upload-time = "2026-09-12T04:11:25.88Z" },
 ]
 
 [[package]]
