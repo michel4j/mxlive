@@ -12,7 +12,7 @@
 
     <!-- Styles -->
     {% block site_css %}
-        <link rel="stylesheet" href="{% static 'themify-icons/css/themify-icons.css' %}" type="text/css">
+        <link rel="stylesheet" href="{% static 'themify-icons/css/themify-icons.css' %}">
         <link rel="stylesheet" href="{% static 'misc/css/noty.min.css' %}" type="text/css"/>
         <link rel="stylesheet" href="{% static 'bootstrap/css/bootstrap.min.css' %}" type="text/css"/>
         <link rel="stylesheet" href="{% static 'lims/css/basiclive.min.css' %}" type="text/css"/>
@@ -30,7 +30,6 @@
 
 </head>
 <body class="{% block body_class %}{% endblock %}">
-
 {% block body %}
     <!-- User Profile Menu -->
     {% if user.is_authenticated %}
@@ -63,11 +62,11 @@
 {% endblock %}
 
 {% if user.is_authenticated %}
-    <div class="footer text-muted">
+    <div class="footer">
         <div class="footer-wrapper overflow-ellipsis">
-            <div class="footer-item"> {{ version }}</div>
+            <div class="footer-item"> {{ APP_NAME }}  v{{ APP_VERSION }}</div>
             <div class="footer-item">&#9400; 2010&ndash;{% now "Y" %}</div>
-            <div class="footer-item"><a class="text-muted" href="/">Dashboard</a></div>
+            <div class="footer-item"><a href="/">HOME</a></div>
         </div>
     </div>
 {% endif %}
@@ -100,14 +99,23 @@
             //placement: 'auto'
         });
 
+        // Enable tooltips
+        const tooltipTriggerList = [].slice.call(document.querySelectorAll('[data-bs-toggle="tooltip"]'));
+        tooltipTriggerList.forEach(function (tooltipTriggerEl) {
+            new bootstrap.Tooltip(tooltipTriggerEl);
+        });
+
         // Enable popovers
-        $("[data-bs-toggle='popover']").popover({
-            container: 'body',
-            placement:  function(context, src) {
-                $(context).addClass($(src).data('type') || '');
-                console.log(context, src);
-                return 'auto';
-            }
+        const popoverTriggerList = [].slice.call(document.querySelectorAll('[data-bs-toggle="popover"]'));
+        popoverTriggerList.forEach(function (popoverTriggerEl) {
+            new bootstrap.Popover(popoverTriggerEl);
+        });
+
+        // Remove modal content after it is hidden
+        document.querySelectorAll('.modal').forEach(function (modal) {
+            modal.addEventListener('hidden.bs.modal', function () {
+                modal.remove();
+            });
         });
 
         // show attention popovers
