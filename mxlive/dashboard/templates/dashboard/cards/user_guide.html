@@ -1,2 +1,102 @@
 {% load bl_guides %}
-{% load_guides %}
+{% load bl_icons %}
+{% load markup %}
+{% load static %}
+
+<div class="card mb-4">
+    <div class="card-header p-1 text-center text-wide text-muted"><small class="">USER GUIDE</small></div>
+    <div class="card-body p-0">
+        <div class="accordion accordion-flush" id="guide-items">
+          {% for guide in guides %}
+          <div class="accordion-item">
+            <h2 class="accordion-header">
+              <button class="accordion-button collapsed" type="button" data-bs-toggle="collapse" data-bs-target="#guide-item-{{ forloop.counter }}" aria-expanded="false" aria-controls="collapseThree">
+                {{ guide.title }}
+              </button>
+            </h2>
+            <div id="guide-item-{{ forloop.counter }}"  class="accordion-collapse collapse" data-bs-parent="#guide-items">
+              <div class="accordion-body">
+                {% if guide.url or guide.attachment %}
+                    {% if guide.has_image %}
+                        <a href="#!" data-modal-url="{% guide_link guide %}">
+                            <div>
+                                <img src="{{ guide.attachment.url}}" width="100%" />
+                                <h5><strong>{{ guide.title }}</strong></h5>
+                            </div>
+                            <div class="text-condensed guide-snippet">
+                                {{ guide.description | markdown }}
+                            </div>
+                        </a>
+                    {% elif guide.has_video or guide.get_kind_display == guide.TYPE.video %}
+                        <a href="#!" data-modal-url="{% guide_link guide %}">
+                            <div>
+                                <img src="{% static 'lims/img/video-embed.png' %}" width="100%" />
+                                <h5>{{ guide.title }}</h5>
+                            </div>
+                            <div class="guide-text-condensed guide-snippet">
+                                {{ guide.description | markdown }}
+                            </div>
+                        </a>
+                    {% elif guide.get_kind_display == guide.TYPE.image %}
+                        <a href="#!" data-modal-url="{% guide_link guide %}">
+                            <div>
+                                <img src="{% static 'lims/img/image-embed.png' %}" width="100%" />
+                                <h5>{{ guide.title }}</h5>
+                            </div>
+                            <div class="text-condensed guide-snippet">
+                                {{ guide.description | markdown }}
+                            </div>
+                        </a>
+                    {% elif guide.modal %}
+                        <h5 class="text-condensed"><strong>{{ guide.title }}</strong></h5>
+                        <a href="#!" data-modal-url="{% guide_link guide %}">
+                            <div class="text-condensed guide-snippet">
+                                {{ guide.description | markdown }}
+                            </div>
+                        </a>
+                    {% elif guide.url %}
+                        <h5 class="text-condensed"><strong>{{ guide.title }}</strong></h5>
+                        <a href="{% guide_link guide %}" target="_blank">
+                            <div class="text-condensed guide-snippet">
+                                {{ guide.description | markdown }}
+                            </div>
+                        </a>
+                    {% else %}
+                        <h5 class="text-condensed"><strong>{{ guide.title }}</strong></h5>
+                        <div class="text-condensed guide-snippet">
+                            {{ guide.description | markdown }}
+                        </div>
+                    {% endif %}
+                {% else %}
+                    <div class="text-condensed guide-snippet">
+                        {{ guide.description | markdown }}
+                    </div>
+                {% endif %}
+                {% if request.user.is_superuser or guide.has_document %}
+                <div class="tools-box w-100 ">
+                    {% if guide.has_document %}
+                        <a href="{{ guide.attachment.url }}" title="Download" download class="me-auto">
+                            {% show_icon icon='ti ti-md ti-clip' %}
+                        </a>
+                    {% endif %}
+                    {% if request.user.is_superuser %}
+                        <a href="#!" data-modal-url="{% url 'guide-edit' guide.pk %}" title="Edit" class="ms-auto"
+                           style="padding-left: 0; padding-right: 0;">
+                            {% show_icon icon='ti ti-md ti-pencil' %}
+                        </a>
+                        <a href="#!" data-modal-url="{% url 'guide-delete' guide.pk %}" title="Delete">
+                            {% show_icon icon='ti ti-md ti-trash' %}
+                        </a>
+                    {% endif %}
+                </div>
+                {% endif %}
+              </div>
+            </div>
+          </div>
+          {% endfor %}
+        </div>
+    </div>
+</div>
+
+
+

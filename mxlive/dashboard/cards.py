@@ -75,6 +75,11 @@ class UserGuideCard(DashboardCard):
     roles = ('user', 'staff')
     column = 'right'
 
+    def get_context_data(self, request=None, **kwargs):
+        context = super().get_context_data(request, **kwargs)
+        context['guides'] = services.get_user_guides()
+        return context
+
 
 @register_card
 class BeamlinesCard(DashboardCard):
@@ -98,7 +103,7 @@ class AdaptorsCard(DashboardCard):
     template_name = 'dashboard/cards/adaptors.html'
     order = 20
     roles = ('staff',)
-    column = 'left'
+    column = 'right'
 
     def get_context_data(self, request=None, **kwargs):
         context = super().get_context_data(request, **kwargs)

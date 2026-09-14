@@ -229,3 +229,11 @@ def get_today_beamline_support():
         return BeamlineSupport.objects.filter(date=timezone.localtime().date()).first()
     except ImportError:
         return None
+
+
+def get_user_guides():
+    """
+    Retrieve user guide list
+    """
+
+    return lims_models.Guide.objects.all()
