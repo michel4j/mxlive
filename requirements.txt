@@ -1,7 +1,0 @@
-basiclive[ldap,cas]
-psycopg2-binary
-python-dotenv
-pymemcache
-django-allauth[mfa,socialaccount] (>=65.19.2,<66.0.0)
-
-django

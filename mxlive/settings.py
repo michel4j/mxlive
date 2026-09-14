@@ -11,6 +11,7 @@ https://docs.djangoproject.com/en/2.2/ref/settings/
 """
 
 from pathlib import Path
+from django.utils.csp import CSP
 
 PROJECT_DIR = Path(__file__).parent
 BASE_DIR = PROJECT_DIR.parent
@@ -61,6 +62,7 @@ INSTALLED_APPS = [
 
 MIDDLEWARE = [
     'django.middleware.security.SecurityMiddleware',
+    "django.middleware.csp.ContentSecurityPolicyMiddleware",
     'django.contrib.sessions.middleware.SessionMiddleware',
     'django.middleware.common.CommonMiddleware',
     'django.middleware.csrf.CsrfViewMiddleware',
@@ -126,6 +128,16 @@ AUTHENTICATION_BACKENDS = [
     'django.contrib.auth.backends.ModelBackend',
     'allauth.account.auth_backends.AuthenticationBackend',
 ]
+
+SECURE_REFERRER_POLICY = "strict-origin-when-cross-origin"
+SECURE_CSP = {
+    "default-src": [CSP.SELF],
+    "img-src": ["data:", CSP.SELF],
+    "style-src": [CSP.SELF, "https://fonts.googleapis.com"],
+    "font-src": [CSP.SELF, "https://fonts.gstatic.com"],
+    "script-src": [CSP.UNSAFE_INLINE, CSP.UNSAFE_EVAL, CSP.SELF],
+    "frame-src": [CSP.NONE],
+}
 
 AUTH_PROVIDERS = []
 AUTH_USER_MODEL = 'lims.Project'

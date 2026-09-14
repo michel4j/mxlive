@@ -1,41 +1,59 @@
-version: '2'
 services:
   database:
-    image: postgres-bkup:latest
+    image: postgres:latest
+    restart: always
     volumes:
       - ./database:/var/lib/postgresql/data:Z
-      - ./database-init:/docker-entrypoint-initdb.d:Z
-      - ./database-backups:/backups:Z
     environment:
-      POSTGRES_PASSWORD: '*****secret*****'
-      DATABASE_USER: postgres
-      BACKUP_DATABASE_USER: postgres
-
-    restart: always
-
-  files:
-    image: mxlive-dataproxy:latest
-    environment:
-      SERVER_NAME: files.local
-    restart: always
-    volumes:
-    - ./files/local:/dataserver/local:Z
-    - /home:/users:ro
-    - ./files/archive:/archive:ro
-    - ./files/cache:/cache:Z
+      POSTGRES_PASSWORD: $DATABASE_PASSWORD
+      POSTGRES_USER: postgres
 
   cache:
     image: memcached
     restart: always
 
-  app:
+  dataserver:
+    image: mxlive-dataproxy:latest
+    environment:
+      DATABASE_PASSWORD: $DATABASE_PASSWORD
+      APACHE_UID: 45571
+    restart: always
+    depends_on:
+      - database
+    volumes:
+      - ./data-local:/dataserver/local:Z
+      - ./cache:/cache:Z
+      # Add mounts for the data specified in DOWNLOAD_DIRS
+      # - /data:/users:ro
+      # - /tmp:/archive:ro
+
+  mxlive:
     image: mxlive:latest
-    hostname: mxlive.example.com
+    restart: always
+    depends_on:
+      - database
+      - cache
     environment:
       SERVER_NAME: mxlive.example.com
     volumes:
-      - ./app/local:/mxlive/local:Z
-      - ./app/certs:/etc/letsencrypt:Z
-    ports:
-      - "443:443"
+      - ./app-local:/mxlive/local:Z
+      # Add words for use in password generation if using LDAP Manager
+      # - /usr/share/dict/words:/usr/share/dict/words
+    labels:
+      deck-chores.notices.command: /mxlive/manage.py user_notify
+      deck-chores.notices.interval: hourly
+      deck-chores.pdb.command: /mxlive/manage.py fetch_depositions
+      deck-chores.pdb.interval: weekly
+      deck-chores.metrics.command: /mxlive/manage.py update_metrics
+      deck-chores.metrics.interval: monthly
+  cron:
+    image: funkyfuture/deck-chores:latest
     restart: always
+    privileged: true
+    depends_on:
+      - mxlive
+      - dataserver
+    environment:
+      TIMEZONE: America/Regina
+    volumes:
+      - $XDG_RUNTIME_DIR/podman/podman.sock:/var/run/docker.sock
