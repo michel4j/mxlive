@@ -5,21 +5,21 @@
 {% load settings %}
 {% load dashboard_tags %}
 
-{% block page_heading %}
+{% block page-title %}
     <h3 class="text-condensed"> <span class="text-muted"><strong>{{ user.username|upper }}</strong> |</span> User</h3>
     <span class="text-muted hidden-xs">
         Start here to manage and monitor shipments, review recent sessions, view and download data, and much more.
     </span>
 {% endblock %}
 
-{% block object_tools %}
+{% block page-tools %}
     <a href="#!" data-modal-url="{% url 'shipment-new' %}">
         {% show_icon label='New Shipment' icon='ti ti-md ti-plus' %}
     </a>
     {% include "lims/tools-user.html" %}
 {% endblock %}
 
-{% block full %}
+{% block page-content %}
 <div class="row">
     {% if left_cards %}
         <div class="col-12 col-md-3">

@@ -30,12 +30,12 @@
     <script type="text/javascript" src="{% static 'lims/js/basiclive-layouts.min.js' %}"></script>
 {% endblock %}
 
-{% block page_heading %}
+{% block page-title %}
     <h3 class="text-condensed"> <span class="text-muted"><strong>{{ user.username|upper }}</strong> |</span> Staff </h3>
     <span class="text-muted text-condensed hidden-xs">Start here to manage shipments, load containers on a beamline, view data, and more.</span>
 {% endblock %}
 
-{% block object_tools %}
+{% block page-tools %}
     {% if USE_ACL %}
         <a href="{% url 'access-list' %}">
             {% show_icon label="Access" icon="ti ti-md ti-rss-alt" %}
@@ -69,7 +69,7 @@
     </a>
 {% endblock %}
 
-{% block full %}
+{% block page-content %}
     <div class="row">
         <div class="col-12 col-sm-6 col-md-3">
             {% for card in left_cards %}
