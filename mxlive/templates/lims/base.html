@@ -62,13 +62,57 @@
 {% endblock %}
 
 {% if user.is_authenticated %}
-    <div class="footer">
-        <div class="footer-wrapper overflow-ellipsis">
-            <div class="footer-item"> {{ APP_NAME }}  v{{ APP_VERSION }}</div>
-            <div class="footer-item">&#9400; 2010&ndash;{% now "Y" %}</div>
-            <div class="footer-item"><a href="/">HOME</a></div>
+    <footer class="bl-footer bg-body-tertiary">
+        <div class="container-fluid p-5 text-body-secondary">
+            <div class="row">
+                <div class="col-lg-3 small"><a
+                        class="d-inline-flex align-items-center mb-2 text-body-emphasis text-decoration-none" href="/"
+                        aria-label="MxLIVE">
+                    <span class="fs-5">MxLIVE</span> </a>
+                    <ul class="list-unstyled small">
+                        <li class="mb-2">
+                            Based on the <a href="https://github.com/michel4j/basic-live/">BasicLIVE</a>.
+                            Designed and built at the <a href="https://www.lightsource.ca">Canadian Light Source </a>.
+                        </li>
+                        <li class="mb-2">
+                            Code licensed <a href="https://github.com/michel4j/mxlive/blob/main/LICENSE" target="_blank"
+                                             rel="license noopener">MIT</a>, docs <a
+                                href="https://creativecommons.org/licenses/by/3.0/" target="_blank"
+                                rel="license noopener">CC BY 3.0</a>.
+                        </li>
+                        <li class="mb-2">Current Version: {{ APP_VERSION }}</li>
+                    </ul>
+                </div>
+                <div class="col col-lg-2 offset-lg-1 small"><h6>Links</h6>
+                    <ul class="list-unstyled">
+                        <li class="mb-2"><a href="/">Home</a></li>
+                        <li class="mb-2"><a href="/docs/">Docs</a></li>
+                        <li class="mb-2"><a href="https://github.com/michel4j/mxlive/issues">Issues</a></li>
+                    </ul>
+                </div>
+                <div class="col col-lg-2 small"><h6>Guides</h6>
+                    <ul class="list-unstyled">
+                        <li class="mb-2"><a href="/docs/5.3/getting-started">Managing Shipments</a></li>
+                        <li class="mb-2"><a href="/docs/5.3/examples/starter-template">Adding Samples</a></li>
+                        <li class="mb-2"><a href="/docs/5.3/getting-started/webpack">Experiment Requests</a></li>
+                    </ul>
+                </div>
+                <div class="col col-lg-2 small"><h6>Related Projects</h6>
+                    <ul class="list-unstyled">
+                        <li class="mb-2">
+                            <a href="https://github.com/michel4j/basic-live" target="_blank" rel="noopener">BasicLIVE</a>
+                        </li>
+                        <li class="mb-2">
+                            <a href="https://github.com/michel4j/django-crisp-modals" target="_blank" rel="noopener">Crisp Modals</a>
+                        </li>
+                        <li class="mb-2">
+                            <a href="https://github.com/michel4j/django-itemlist" target="_blank" rel="noopener">Item List</a>
+                        </li>
+                    </ul>
+                </div>
+            </div>
         </div>
-    </div>
+    </footer>
 {% endif %}
 
 {% include "lims/messages.html" %}
@@ -79,18 +123,6 @@
 
 {% block extra_js %}{% endblock %}
 <script>
-    function serverHeartBeat() {
-        $.ajax({
-            url: 'misc/ping/',
-            success: function (result) {
-                console.log(result);
-            },
-            error: function (result) {
-                console.log(result);
-            }
-        });
-    }
-
     $(document).ready(function () {
         // enable tooltips
         $("[title]").not("[data-bs-toggle]").tooltip({
@@ -120,6 +152,9 @@
 
         // show attention popovers
         $(".attention").popover('show');
+
+        // Monitor Progress
+        monitorProgress();
 
         // Initialize crisp_modals
         $('#modal-target').initModal({
