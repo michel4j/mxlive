@@ -89,7 +89,7 @@ Load your custom tag into the template, and call it:
 .. code-block:: django
     :emphasize-lines: 1,4
 
-    {% load data_server %}
+    {% load bl_data_tags %}
 
     {% block data_content %}
         {% sample_report as sample %}
@@ -101,8 +101,8 @@ Add an empty element with an ``id``, assign your report to a javascript variable
 .. code-block:: django
     :emphasize-lines: 8,10,19-21
 
-    {% load data_server %}
-    {% load jsutils %}
+    {% load bl_data_tags %}
+    {% load bl_tags %}
 
     {% block data_content %}
         {% sample_report as sample %}
