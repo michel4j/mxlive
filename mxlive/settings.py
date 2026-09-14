@@ -133,7 +133,7 @@ SECURE_REFERRER_POLICY = "strict-origin-when-cross-origin"
 SECURE_CSP = {
     "default-src": [CSP.SELF],
     "img-src": ["data:", CSP.SELF],
-    "style-src": [CSP.SELF, "https://fonts.googleapis.com"],
+    "style-src": [CSP.SELF, CSP.UNSAFE_INLINE, "https://fonts.googleapis.com"],
     "font-src": [CSP.SELF, "https://fonts.gstatic.com"],
     "script-src": [CSP.UNSAFE_INLINE, CSP.UNSAFE_EVAL, CSP.SELF],
     "frame-src": [CSP.NONE],
