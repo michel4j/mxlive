@@ -1,3 +1,3 @@
 :root,[data-bs-theme=light]{--bubblegum-pink: #ff6978ff;--porcelain: #fffcf9ff;--icy-aqua: #b1ede8ff;--mauve-shadow: #6d435aff;--shadow-grey: #352d39ff;--bs-primary: var(--mauve-shadow);--bs-primary-rgb: 109, 67, 90;--bs-border-radius: 0.375rem;--bs-border-radius-sm: 0.25rem;--bs-border-radius-lg: 0.5rem;--bs-border-radius-xl: 1rem;--bs-border-radius-xxl: 2rem;--bs-border-radius-2xl: var(--bs-border-radius-xxl);--bs-border-radius-pill: 50rem;--bs-focus-ring-width: 0.25rem}[data-bs-theme=dark]{color-scheme:dark}.modal-header{min-height:4rem;padding:0.5rem 1rem;background-color:var(--bs-tertiary-bg, inherit);--bs-text-opacity: 0.7;color:var(--bs-tertiary-color, inherit)}.modal-header .btn-close{color:var(--bs-tertiary-color, inherit)}.modal-header .modal-subtitle{line-height:.9;opacity:0.7}
 
-/*# sourceMappingURL=mxlive.min.css.map */
+/*# sourceMappingURL=instance.min.css.map */
