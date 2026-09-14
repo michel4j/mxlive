@@ -16,6 +16,8 @@
     --bs-border-radius-2xl: var(--bs-border-radius-xxl);
     --bs-border-radius-pill: 50rem;
     --bs-focus-ring-width: 0.25rem;
+    --bs-body-font-size: 11pt;
+    --bs-list-group-bg: transparent;
 }
 
 [data-bs-theme=dark] {
@@ -37,4 +39,9 @@
     line-height: .9;
     opacity: 0.7;
   }
+}
+
+.card {
+  --bs-card-border-color: transparent;
+  --bs-card-bg: var(--bs-secondary-bg);
 }
