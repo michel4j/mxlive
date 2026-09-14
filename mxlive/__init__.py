@@ -1,6 +1,3 @@
-from importlib.metadata import version, PackageNotFoundError
-
-try:
-    __version__ = version('mxlive')
-except PackageNotFoundError:
-    __version__ = '0.0.0-dev'
+__version__ = '2019.04.377'
+__author__ = 'Kathryn Janzen, Michel Fodje'
+__email__ = 'kathryn.janzen@lightsource.ca, michel.fodje@lightsource.ca'

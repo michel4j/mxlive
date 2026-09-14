@@ -10,8 +10,10 @@ For the full list of settings and their values, see
 https://docs.djangoproject.com/en/2.2/ref/settings/
 """
 
+
 from pathlib import Path
 from django.utils.csp import CSP
+import mxlive
 
 PROJECT_DIR = Path(__file__).parent
 BASE_DIR = PROJECT_DIR.parent
@@ -200,6 +202,7 @@ try:
 except ImportError as err:
     print(f'Error importing local settings: {err}')
 
+BASICLIVE_LIMS['APP_VERSION'] = mxlive.__version__
 
 if BASICLIVE_LIMS.get('USE_SCHEDULE') is False:
     INSTALLED_APPS.remove('basiclive.core.schedule')
