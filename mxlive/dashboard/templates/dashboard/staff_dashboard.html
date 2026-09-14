@@ -29,9 +29,9 @@
     <script type="text/javascript" src="{% static 'lims/js/basiclive-layouts.min.js' %}"></script>
 {% endblock %}
 
+{% block page-pre-title %}Staff{% endblock %}
 {% block page-title %}
-    <h3 class="text-condensed"> <span class="text-muted"><strong>{{ user.username|upper }}</strong> |</span> Staff </h3>
-    <span class="text-muted text-condensed hidden-xs">Start here to manage shipments, load containers on a beamline, view data, and more.</span>
+    <h3 class="text-condensed"> <span class="text-muted"><strong>{{ user.username|upper }}</strong></h3>
 {% endblock %}
 
 {% block page-tools %}
@@ -66,6 +66,15 @@
     <a href="#!" data-modal-url="{% url 'new-guide' %}" title="Create Guide">
         {% show_icon label="Add Guide" icon="ti ti-md ti-agenda" %}
     </a>
+{% endblock %}
+
+{% block page-status-style %}callout{% endblock %}
+{% block page-status-bar %}
+    <div>
+        <span class="text-muted text-condensed hidden-xs">Start here to manage beamlines, shipments, load containers
+            on a beamline, view data, and more.
+        </span>
+    </div>
 {% endblock %}
 
 {% block page-content %}
