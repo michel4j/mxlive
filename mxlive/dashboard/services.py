@@ -137,7 +137,7 @@ def get_staff_active_connections():
         report_count=Count('datasets__reports', distinct=True)
     ).with_duration()
 
-    active_access = Access.objects.filter(status__iexact=Access.STATES.CONNECTED) if (use_acl and Access) else lims_models.Project.objects.none()
+    active_access = Access.objects.filter(status__iexact=Access.Status.CONNECTED) if (use_acl and Access) else lims_models.Project.objects.none()
 
     access_info = []
     connections = Access.objects.none() if (use_acl and Access) else lims_models.Project.objects.none()
