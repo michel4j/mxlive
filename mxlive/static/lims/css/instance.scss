@@ -50,7 +50,7 @@
 
 .card {
   --bs-card-border-color: transparent;
-  --bs-card-bg: var(--bs-secondary-bg);
+  --bs-card-bg: rgba(var(--bs-emphasis-color-rgb), 0.05);
 }
 
 .list-group-item {
@@ -59,4 +59,12 @@
 
 .accordion {
   --bs-accordion-bg: transparent;
+}
+
+@for $i from 1 through 5 {
+  $value: $i * 100;
+
+  .fixed-height-#{$value} {
+    height: unquote("#{$value}px");
+  }
 }

@@ -3,11 +3,9 @@
 {% load bl_guides %}
 {% load dashboard_tags %}
 
+{% block page-pre-title %}User{% endblock %}
 {% block page-title %}
-    <h3 class="text-condensed"> <span class="text-muted"><strong>{{ user.username|upper }}</strong> |</span> User</h3>
-    <span class="text-muted hidden-xs">
-        Start here to manage and monitor shipments, review recent sessions, view and download data, and much more.
-    </span>
+    <h3 class="text-condensed"> <span class="text-muted"><strong>{{ user.username|upper }}</strong></h3>
 {% endblock %}
 
 {% block page-tools %}
@@ -15,6 +13,15 @@
         {% show_icon label='New Shipment' icon='ti ti-md ti-plus' %}
     </a>
     {% include "lims/tools-user.html" %}
+{% endblock %}
+
+{% block page-status-style %}callout{% endblock %}
+{% block page-status-bar %}
+    <div>
+        <span class="text-muted text-condensed hidden-xs">Start here to manage and monitor shipments, review recent
+            sessions, view and download data, and much more.
+        </span>
+    </div>
 {% endblock %}
 
 {% block page-content %}
