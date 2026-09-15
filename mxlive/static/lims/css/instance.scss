@@ -17,7 +17,6 @@
     --bs-border-radius-pill: 50rem;
     --bs-focus-ring-width: 0.25rem;
     --bs-body-font-size: 11pt;
-    --bs-list-group-bg: transparent;
 }
 
 [data-bs-theme=dark] {
@@ -44,4 +43,12 @@
 .card {
   --bs-card-border-color: transparent;
   --bs-card-bg: var(--bs-secondary-bg);
+}
+
+.list-group-item {
+    --bs-list-group-bg: transparent;
+}
+
+.accordion {
+  --bs-accordion-bg: transparent;
 }
