@@ -89,6 +89,10 @@
 
 .accordion {
   --bs-accordion-bg: transparent;
+  .accordion-button {
+    --bs-accordion-btn-padding-y: 0.75rem;
+    --bs-accordion-btn-padding-x: 0.75rem;
+  }
 }
 
 @for $i from 1 through 5 {
