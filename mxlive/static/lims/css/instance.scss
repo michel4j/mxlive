@@ -1,18 +1,18 @@
 
 :root, [data-bs-theme=light] {
-  --midnight-violet: #36213eff;
-  --plum: #f397d6ff;
-  --alabaster-grey: #d9dcd6ff;
-  --dim-grey: #726e60ff;
-  --midnight-violet-rgb: 54, 33, 62;
-  --plum-rgb: 243, 151, 214;
-  --alabaster-grey-rgb: 217, 220, 214;
-  --dim-grey-rgb: 114, 110, 96;
+  --midnight-violet: #2b061eff;
+  --yale-blue: #16425bff;
+  --honeydew: #e0f2e9ff;
+  --pumpkin-spice: #ff8c42ff;
+  --grey-olive: #858786ff;
+  --midnight-violet-rgb: 43, 6, 30;
+  --yale-blue-rgb: 22, 66, 91;
+  --honeydew-rgb: 224, 242, 233;
+  --pumpkin-spice-rgb: 255, 140, 66;
+  --grey-olive-rgb: 133, 135, 134;
 
   --bs-primary: var(--midnight-violet);
   --bs-primary-rgb: var(--midnight-violet-rgb);
-  --bs-secondary: var(--alabaster-grey);
-  --bs-secondary-rgb: var(--alabaster-grey-rgb);
   --bs-border-radius: 0.375rem;
   --bs-border-radius-sm: 0.25rem;
   --bs-border-radius-lg: 0.5rem;
@@ -21,44 +21,14 @@
   --bs-border-radius-2xl: var(--bs-border-radius-xxl);
   --bs-border-radius-pill: 50rem;
   --bs-focus-ring-width: 0.25rem;
-  --bs-body-font-size: 11pt;
-
-
-    /* Subtle Background: Keep the hue, drop the saturation, make it very light */
-  --bs-primary-bg-subtle: hsl(from var(--bs-primary) h calc(s * 0.8) 80%);
-  --bs-primary-border-subtle: hsl(from var(--bs-primary) h s calc(l * 0.9));
-  --bs-primary-hover: hsl(from var(--bs-primary) h s calc(l * 0.5));
-  --bs-primary-text-emphasis: hsl(from var(--bs-primary) h calc(s * 1.1) calc(l * 0.75));
-  --bs-form-check-input-checked-bg-color: var(--bs-primary);
-  --bs-form-check-input-checked-border-color: var(--bs-primary-border-subtle);
-  --bs-focus-ring-color: var(--bs-primary-hover);
-}
-.btn-primary {
-  --bs-btn-bg: var(--bs-primary);
-  --bs-btn-border-color: var(--bs-primary);
-
-  /* Custom manual adjustments for states */
-  --bs-btn-hover-bg: var(--bs-primary-hover);
-  --bs-btn-hover-border-color: var(--bs-primary-hover);
-  --bs-btn-active-bg: var(--bs-primary-active);
-  --bs-btn-active-border-color: var(--bs-primary-active);
-  --bs-btn-disabled-bg: var(--bs-primary);
-  --bs-btn-disabled-border-color: var(--bs-primary);
-}
-
-.btn-outline-primary {
-  --bs-btn-color: var(--bs-primary);
-  --bs-btn-border-color: var(--bs-primary);
-  --bs-btn-hover-border-color: var(--bs-primary);
-  --bs-btn-active-bg: var(--bs-primary);
-  --bs-btn-active-border-color: var(--bs-primary);
+  --bs-body-font-size: 14px;
 }
 
 [data-bs-theme=dark] {
   color-scheme: dark;
   --bl-shaded-bg: rgba(255, 255, 255, 0.05);
-  --bs-link-color: var(--plum);
-  --bs-link-color-rgb: var(--plum-rgb);
+  --bs-link-color: var(--grey-olive);
+  --bs-link-color-rgb: var(--grey-olive-rgb);
 }
 
 .modal-header {
@@ -79,26 +49,70 @@
 }
 
 .card {
-  --bs-card-border-color: transparent;
-  --bs-card-bg: rgba(var(--bs-emphasis-color-rgb), 0.05);
-}
-
-.list-group-item {
-  --bs-list-group-bg: transparent;
+  --bs-card-cap-bg: rgba(var(--bs-body-color-rgb), 0.06);
 }
 
 .accordion {
   --bs-accordion-bg: transparent;
-  .accordion-button {
-    --bs-accordion-btn-padding-y: 0.75rem;
-    --bs-accordion-btn-padding-x: 0.75rem;
-  }
+  --bs-accordion-btn-padding-x: 0.75rem;
+  --bs-accordion-btn-padding-y: 0.75rem;
 }
 
-@for $i from 1 through 5 {
-  $value: $i * 100;
+@for $i from 1 through 10 {
+  $value: $i * 50;
 
   .fixed-height-#{$value} {
     height: unquote("#{$value}px");
+  }
+}
+
+$hsl-category-colors: (
+  (0, 211, 36%, 48%),
+  (1, 30, 88%, 56%),
+  (2, 359, 70%, 61%),
+  (3, 175, 31%, 59%),
+  (4, 113, 34%, 47%),
+  (5, 47, 82%, 61%),
+  (6, 316, 25%, 58%),
+  (7, 354, 100%, 81%),
+  (8, 22, 24%, 49%),
+  (9, 20, 10%, 70%),
+);
+
+$rgb-category-colors: (
+  (0, 78, 121, 167),  //#4e79a7
+  (1, 242, 142, 44),  //#f28e2c
+  (2, 225, 87, 89),   //#e15759
+  (3, 118, 183, 178), //#76b7b2
+  (4, 89, 161, 79),   //#59a14f
+  (5, 237, 201, 73),  //#edc949
+  (6, 175, 122, 161), //#af7aa1
+  (7, 255, 157, 167), //#ff9da7
+  (8, 156, 117, 95),  //#9c755f
+  (9, 186, 176, 171), //#bab0ab
+);
+
+//@each $key, $hue, $saturation, $lightness in $hsl-category-colors {
+//  .text-bg-cat-#{$key} {
+//    --bl-cat-color: hsla(#{$hue}, #{$saturation}, #{$lightness}, 1);
+//    --bl-cat-bg: hsla(#{$hue}, #{$saturation}, #{$lightness}, 0.25);
+//    --bs-card-bg: var(--bl-cat-bg);
+//    color: var(--bl-cat-color);
+//    background-color: var(--bl-cat-bg);
+//    &.b-0 {
+//      --bs-card-border-color: transparent;
+//    }
+//  }
+//}
+@each $key, $r, $g, $b in $rgb-category-colors {
+  .text-bg-cat-#{$key} {
+    --bl-cat-color: rgba(#{$r}, #{$g}, #{$b}, 1);
+    --bl-cat-bg: rgba(#{$r}, #{$g}, #{$b}, 0.15);
+    --bs-card-bg: var(--bl-cat-bg);
+    color: var(--bl-cat-color);
+    background-color: var(--bl-cat-bg);
+    &.b-0 {
+      --bs-card-border-color: transparent;
+    }
   }
 }
