@@ -46,7 +46,6 @@
     <a href="{% url 'user-list' %}">
         {% show_icon label="Accounts" icon="ti ti-md ti-user" %}
     </a>
-
     {% if USE_SCHEDULE %}
         <a href="{% url 'schedule' %}">
             {% show_icon label="Schedule" icon="ti ti-md ti-time" %}
@@ -62,7 +61,7 @@
             {% show_icon label="Support" icon="ti ti-md ti-headphone-alt" %}
         </a>
     {% endif %}
-    <div class="separator"></div>
+
     <a href="#!" data-modal-url="{% url 'new-guide' %}" title="Create Guide">
         {% show_icon label="Add Guide" icon="ti ti-md ti-agenda" %}
     </a>

@@ -1,3 +1,7 @@
+@use "sass:color";
+@function hex-to-rgb($hex) {
+  @return red($hex), green($hex), blue($hex);
+}
 
 :root, [data-bs-theme=light] {
   --midnight-violet: #2b061eff;
@@ -50,19 +54,27 @@
 
 .card {
   --bs-card-cap-bg: rgba(var(--bs-body-color-rgb), 0.06);
+  --bs-card-border-color: transparent;
 }
 
 .accordion {
   --bs-accordion-bg: transparent;
   --bs-accordion-btn-padding-x: 0.75rem;
-  --bs-accordion-btn-padding-y: 0.75rem;
+  --bs-accordion-btn-padding-y: 0.6rem;
+  --bs-accordion-border-color: rgba(from var(--bs-body-color) r g b / 0.11)
 }
 
+.list-group-item:not([class*="list-group-item-theme-"]) {
+  --bs-list-group-bg: transparent;
+  --bs-list-group-border-color: rgba(from var(--bs-body-color) r g b / 0.11);
+}
 @for $i from 1 through 10 {
   $value: $i * 50;
 
   .fixed-height-#{$value} {
     height: unquote("#{$value}px");
+    scrollbar-width: thin;
+    scrollbar-gutter: auto;
   }
 }
 
@@ -111,8 +123,8 @@ $rgb-category-colors: (
     --bs-card-bg: var(--bl-cat-bg);
     color: var(--bl-cat-color);
     background-color: var(--bl-cat-bg);
-    &.b-0 {
-      --bs-card-border-color: transparent;
-    }
+  }
+  .bg-cat-#{key} {
+    background-color: var(--bl-cat-bg);
   }
 }

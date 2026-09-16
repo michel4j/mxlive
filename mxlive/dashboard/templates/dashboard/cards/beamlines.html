@@ -1,14 +1,14 @@
-<div class="card mb-4">
+<div class="card text-bg-cat-9 mb-4">
     <div class="card-header text-center text-wide text-muted"><small class="">BEAMLINES</small></div>
     <div class="list-group list-group-flush list-group-hover">
     {% for bl in beamlines %}
         {% with bl.active_automounter as automounter %}
-            <a href="{% url 'beamline-detail' pk=bl.pk %}" class="text-center list-group-item p-2">
-                <div id="layout-{{ automounter.pk }}" class="layout-lg">
-                    <h5 class="text-condensed">
-                        <strong><span class="text-muted">{{ bl.acronym }}</span></strong> | {{ automounter.container.kind|default:"Manual Mounting" }}
+            <a href="{% url 'beamline-detail' pk=bl.pk %}" class="text-center list-group-item text-bg-cat-{{ forloop.counter0 }} p-3">
+                <div id="layout-{{ automounter.pk }}" class="layout-lg mb-2">
+                    <h5 class="text-condensed my-0">
+                        <strong class="text-condensed fs-5">{{ bl.acronym }}</strong>
                     </h5>
-                    <hr/>
+                    <small>{{ automounter.container.kind|default:"Manual Mounting" }}</small>
                 </div>
                 {% if automounter %}
                     {% include "lims/details/container-layout.html" with container=automounter.container details=False %}
