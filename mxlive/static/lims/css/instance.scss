@@ -38,12 +38,13 @@
 .modal-header {
   min-height: 4rem;
   padding: 0.5rem 1rem;
-  background-color: var(--bs-tertiary-bg, inherit);
+  background-color: var(--bs-primary, inherit);
   --bs-text-opacity: 0.7;
-  color: var(--bs-tertiary-color, inherit);
+  color: contrast-color(var(--bs-primary));
 
   .btn-close {
-    color: var(--bs-tertiary-color, inherit);
+    color: contrast-color(var(--bs-primary));
+    filter: invert(1);
   }
 
   .modal-subtitle {
