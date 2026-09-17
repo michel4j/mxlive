@@ -12,7 +12,9 @@ https://docs.djangoproject.com/en/2.2/ref/settings/
 
 
 from pathlib import Path
+
 from django.utils.csp import CSP
+
 import mxlive
 
 PROJECT_DIR = Path(__file__).parent
@@ -198,7 +200,6 @@ BASICLIVE_LIMS = {
 
 try:
     from local.settings import *
-    print(f'Importing local settings from {LOCAL_DIR / "settings.py"}')
 except ImportError as err:
     print(f'Error importing local settings: {err}')
 

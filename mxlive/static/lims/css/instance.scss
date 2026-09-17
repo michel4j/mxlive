@@ -3,20 +3,19 @@
   @return red($hex), green($hex), blue($hex);
 }
 
-:root, [data-bs-theme=light] {
-  --midnight-violet: #2b061eff;
-  --yale-blue: #16425bff;
-  --honeydew: #e0f2e9ff;
-  --pumpkin-spice: #ff8c42ff;
-  --grey-olive: #858786ff;
-  --midnight-violet-rgb: 43, 6, 30;
-  --yale-blue-rgb: 22, 66, 91;
-  --honeydew-rgb: 224, 242, 233;
-  --pumpkin-spice-rgb: 255, 140, 66;
-  --grey-olive-rgb: 133, 135, 134;
+$bl-palette-0: #557055;
+$bl-palette-1: #9ABF9B;
+$bl-palette-2: #EBDBAC;
+$bl-palette-3: #CCB27C;
+$bl-palette-4: #705B36;
 
-  --bs-primary: var(--midnight-violet);
-  --bs-primary-rgb: var(--midnight-violet-rgb);
+
+:root, [data-bs-theme=light] {
+  --bl-brand-accent: #{$bl-palette-0};
+  --bl-brand-secondary: #{$bl-palette-1};
+  --bl-brand-neutral: #{$bl-palette-2};
+  --bs-primary: #{$bl-palette-0};
+  --bs-primary-rgb: #{hex-to-rgb($bl-palette-0)};
   --bs-border-radius: 0.375rem;
   --bs-border-radius-sm: 0.25rem;
   --bs-border-radius-lg: 0.5rem;
@@ -31,8 +30,8 @@
 [data-bs-theme=dark] {
   color-scheme: dark;
   --bl-shaded-bg: rgba(255, 255, 255, 0.05);
-  --bs-link-color: var(--grey-olive);
-  --bs-link-color-rgb: var(--grey-olive-rgb);
+  --bs-link-color: #{$bl-palette-1};
+  --bs-link-color-rgb: #{hex-to-rgb($bl-palette-1)};
 }
 
 .modal-header {
