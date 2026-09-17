@@ -35,6 +35,29 @@ class DashboardCard:
             return is_staff_or_superuser
         return True
 
+    def __init_subclass__(cls, **kwargs):
+        super().__init_subclass__(**kwargs)
+        if 'get_context_data' in cls.__dict__:
+            orig_get_context = cls.get_context_data
+            if getattr(orig_get_context, '_is_cached', False):
+                return
+
+            def get_context_data(self, request=None, **kw):
+                req = request or self.request
+                if req is not None and not kw:
+                    cache = getattr(req, '_card_context_cache', None)
+                    if cache is None:
+                        cache = req._card_context_cache = {}
+                    if self.name in cache:
+                        return cache[self.name]
+                    ctx = orig_get_context(self, request=req, **kw)
+                    cache[self.name] = ctx
+                    return ctx
+                return orig_get_context(self, request=req, **kw)
+
+            get_context_data._is_cached = True
+            cls.get_context_data = get_context_data
+
     def get_context_data(self, request=None, **kwargs):
         """
         Return the context data required to render this card.
@@ -49,13 +72,6 @@ class DashboardCard:
         context.update(kwargs)
         return context
 
-    def has_content(self, context, request=None):
-        """
-        Determine if the card has content to display.
-        Override to suppress rendering when card data is empty.
-        """
-        return True
-
     def render(self, context=None, request=None):
         """
         Render the card HTML using its template and context data.
@@ -67,12 +83,9 @@ class DashboardCard:
         if not self.template_name:
             return mark_safe('')
 
-        card_context = self.get_context_data(req)
+        card_context = dict(self.get_context_data(req))
         if context:
             card_context.update(context)
-
-        if not self.has_content(card_context, request=req):
-            return mark_safe('')
 
         return mark_safe(render_to_string(self.template_name, card_context, request=req))
 

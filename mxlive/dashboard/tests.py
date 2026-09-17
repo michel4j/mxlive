@@ -264,9 +264,13 @@ class CoreCardsTests(SimpleTestCase):
         context = card.get_context_data(request)
         self.assertEqual(context['support'], 'staff_member')
 
+    @patch('mxlive.dashboard.services.get_today_beamline_support')
+    @patch('mxlive.dashboard.services.get_user_sessions')
     @patch('mxlive.dashboard.services.get_user_beamtimes')
-    def test_user_and_staff_cards_filtering(self, mock_bt):
+    def test_user_and_staff_cards_filtering(self, mock_bt, mock_sess, mock_sup):
         mock_bt.return_value = [MagicMock()]
+        mock_sess.return_value = [MagicMock()]
+        mock_sup.return_value = MagicMock()
         request_user = self.factory.get('/')
         request_user.user = self.regular_user
 
@@ -301,6 +305,9 @@ class DashboardViewsTests(SimpleTestCase):
         User = get_user_model()
         self.regular_user = User(username='testuser', is_superuser=False)
         self.staff_user = User(username='staffuser', is_superuser=True)
+        self.support_patcher = patch('mxlive.dashboard.services.get_today_beamline_support', return_value=None)
+        self.support_patcher.start()
+        self.addCleanup(self.support_patcher.stop)
 
     def test_user_dashboard_view_context(self):
         view = UserDashboardView()
@@ -600,7 +607,7 @@ class DashboardSecurityAndRoutingTests(SimpleTestCase):
     @patch('mxlive.dashboard.services.get_user_beamtimes')
     def test_regular_user_on_root_renders_user_dashboard(self, mock_bt, mock_sess, mock_ship):
         mock_bt.return_value = []
-        mock_sess.return_value = []
+        mock_sess.return_value = [MagicMock()]
         mock_ship.return_value = []
 
         request = self.factory.get('/')
@@ -684,7 +691,7 @@ class DashboardSecurityAndRoutingTests(SimpleTestCase):
         should be dispatched to UserDashboardView on root '/', showing user cards.
         """
         mock_bt.return_value = []
-        mock_sess.return_value = []
+        mock_sess.return_value = [MagicMock()]
         mock_ship.return_value = []
 
         request = self.factory.get('/')
@@ -707,7 +714,7 @@ class DashboardSecurityAndRoutingTests(SimpleTestCase):
         (recent shipments, recent sessions, user guide), not just user guide.
         """
         mock_bt.return_value = []
-        mock_sess.return_value = []
+        mock_sess.return_value = [MagicMock()]
         mock_ship.return_value = []
 
         request = self.factory.get('/user/')
@@ -767,9 +774,132 @@ class DashboardSecurityAndRoutingTests(SimpleTestCase):
 
         # When user has beamtimes
         mock_bt.return_value = [MagicMock()]
-        response2 = UserDashboardView.as_view()(request)
+        request2 = self.factory.get('/user/')
+        request2.user = self.regular_user
+        response2 = UserDashboardView.as_view()(request2)
         self.assertIn('upcoming_beamtime', [c.name for c in response2.context_data['cards']])
         self.assertEqual(len(response2.context_data['left_cards']), 1)
+
+
+class CardQueryDeduplicationTests(SimpleTestCase):
+
+    def setUp(self):
+        self.factory = RequestFactory()
+        User = get_user_model()
+        self.regular_user = User(username='testuser', is_superuser=False, pk=1)
+        self.staff_user = User(username='staffuser', is_superuser=True, pk=2)
+
+    @patch('mxlive.dashboard.services.get_user_beamtimes')
+    def test_upcoming_beamtime_query_deduplication(self, mock_get_beamtimes):
+        class FakeBeamtime:
+            pk = 1
+            duration = timedelta(seconds=28800)
+            current = False
+            beamline = MagicMock(acronym='08B1-1')
+            access = MagicMock()
+            start = timezone.now()
+            local_contact = None
+
+        mock_get_beamtimes.return_value = [FakeBeamtime()]
+        card = card_registry.get_card('upcoming_beamtime')
+        request = self.factory.get('/')
+        request.user = self.regular_user
+
+        self.assertTrue(card.is_visible(request))
+        rendered = card.render(request=request)
+        self.assertIn('UPCOMING BEAMTIME', rendered)
+        self.assertEqual(mock_get_beamtimes.call_count, 1)
+
+        # Subsequent get_context_data call on the same request is cached
+        ctx = card.get_context_data(request)
+        self.assertEqual(mock_get_beamtimes.call_count, 1)
+        self.assertEqual(len(ctx['beamtimes']), 1)
+
+    @patch('mxlive.dashboard.services.get_user_sessions')
+    def test_recent_sessions_query_deduplication(self, mock_get_sessions):
+        class FakeSession:
+            pk = 1
+            name = 'Session-001'
+            start = timezone.now()
+            beamline = MagicMock(acronym='BL-1')
+            total_time = 3600
+            last_record_time = timezone.now()
+            data_count = 5
+            report_count = 2
+            is_recent = False
+            feedback = MagicMock(all=lambda: [])
+
+        mock_get_sessions.return_value = [FakeSession()]
+        card = card_registry.get_card('recent_sessions')
+        request = self.factory.get('/')
+        request.user = self.regular_user
+
+        self.assertTrue(card.is_visible(request))
+        rendered = card.render(request=request)
+        self.assertIn('RECENT SESSIONS', rendered)
+        self.assertEqual(mock_get_sessions.call_count, 1)
+
+        # Subsequent get_context_data call on the same request is cached
+        ctx = card.get_context_data(request)
+        self.assertEqual(mock_get_sessions.call_count, 1)
+        self.assertEqual(len(ctx['sessions']), 1)
+
+    @patch('mxlive.dashboard.services.get_today_beamline_support')
+    def test_local_contact_query_deduplication(self, mock_get_support):
+        class FakeSupport:
+            class staff:
+                contact_email = 'alice@example.com'
+                contact_phone = '555-0100'
+            def __str__(self):
+                return 'Alice Doe'
+
+        mock_get_support.return_value = FakeSupport()
+        card = card_registry.get_card('local_contact')
+        request = self.factory.get('/')
+        request.user = self.staff_user
+
+        self.assertTrue(card.is_visible(request))
+        rendered = card.render(request=request)
+        self.assertIn('LOCAL CONTACT', rendered)
+        self.assertEqual(mock_get_support.call_count, 1)
+
+        # Subsequent get_context_data call on the same request is cached
+        ctx = card.get_context_data(request)
+        self.assertEqual(mock_get_support.call_count, 1)
+        self.assertIsNotNone(ctx['support'])
+
+    @patch('mxlive.dashboard.services.get_user_beamtimes')
+    def test_cache_is_request_scoped_not_shared_across_requests(self, mock_get_beamtimes):
+        mock_get_beamtimes.return_value = [MagicMock()]
+        card = card_registry.get_card('upcoming_beamtime')
+
+        request1 = self.factory.get('/')
+        request1.user = self.regular_user
+
+        request2 = self.factory.get('/')
+        request2.user = self.regular_user
+
+        card.is_visible(request1)
+        self.assertEqual(mock_get_beamtimes.call_count, 1)
+
+        card.is_visible(request1)
+        self.assertEqual(mock_get_beamtimes.call_count, 1)
+
+        card.is_visible(request2)
+        self.assertEqual(mock_get_beamtimes.call_count, 2)
+
+    @patch('mxlive.dashboard.services.get_user_beamtimes')
+    def test_empty_content_suppressed_and_queried_once(self, mock_get_beamtimes):
+        mock_get_beamtimes.return_value = []
+        card = card_registry.get_card('upcoming_beamtime')
+        request = self.factory.get('/')
+        request.user = self.regular_user
+
+        self.assertFalse(card.is_visible(request))
+        rendered = card.render(request=request)
+        self.assertEqual(rendered, '')
+        self.assertEqual(mock_get_beamtimes.call_count, 1)
+
 
 
 

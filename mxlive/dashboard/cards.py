@@ -17,22 +17,14 @@ class UpcomingBeamtimeCard(DashboardCard):
             return False
         if not lims_cfg.USE_SCHEDULE:
             return False
-        req = request or self.request
-        user = getattr(req, 'user', None)
-        if not user or not user.is_authenticated:
-            return False
-        beamtimes = services.get_user_beamtimes(user)
-        return beamtimes.exists() if hasattr(beamtimes, 'exists') else bool(beamtimes)
-
-    def has_content(self, context, request=None):
-        beamtimes = context.get('beamtimes')
-        return beamtimes.exists() if hasattr(beamtimes, 'exists') else bool(beamtimes)
+        context = self.get_context_data(request)
+        return bool(context.get('beamtimes'))
 
     def get_context_data(self, request=None, **kwargs):
         context = super().get_context_data(request, **kwargs)
         req = request or self.request
         user = getattr(req, 'user', None)
-        context['beamtimes'] = services.get_user_beamtimes(user) if user else []
+        context['beamtimes'] = services.get_user_beamtimes(user) if user and user.is_authenticated else []
         return context
 
 
@@ -62,15 +54,17 @@ class RecentSessionsCard(DashboardCard):
     roles = ('user',)
     column = 'center'
 
-    def has_content(self, context, request=None):
-        sessions = context.get('sessions')
-        return sessions.exists() if hasattr(sessions, 'exists') else bool(sessions)
+    def is_visible(self, request):
+        if not super().is_visible(request):
+            return False
+        context = self.get_context_data(request)
+        return bool(context.get('sessions'))
 
     def get_context_data(self, request=None, **kwargs):
         context = super().get_context_data(request, **kwargs)
         req = request or self.request
         user = getattr(req, 'user', None)
-        context['sessions'] = services.get_user_sessions(user) if user else []
+        context['sessions'] = services.get_user_sessions(user) if user and user.is_authenticated else []
         return context
 
 
@@ -161,9 +155,9 @@ class LocalContactCard(DashboardCard):
     def is_visible(self, request):
         if not super().is_visible(request):
             return False
-        return bool(lims_cfg.USE_CRM)
-
-    def has_content(self, context, request=None):
+        if not (lims_cfg.USE_CRM and lims_cfg.USE_SCHEDULE):
+            return False
+        context = self.get_context_data(request)
         return bool(context.get('support'))
 
     def get_context_data(self, request=None, **kwargs):
