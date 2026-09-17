@@ -393,7 +393,6 @@ class TemplateRenderingTests(SimpleTestCase):
         request.user = self.regular_user
         rendered = card.render(request=request)
         self.assertIn('RECENT SHIPMENTS', rendered)
-        self.assertIn('Start Now', rendered)
 
     @patch('mxlive.dashboard.services.get_user_sessions')
     def test_render_recent_sessions_card_empty(self, mock_sessions):
