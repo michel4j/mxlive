@@ -1,19 +1,16 @@
 {% extends "dashboard/cards/base_card.html" %}
-
+{% load bl_icons %}
 {% block card_body_class %}p-0{% endblock %}
 {% block card_content %}
     <div class="list-group list-group-flush">
-        <div class="list-group-item empty p-2">
-            <a href="#!" data-modal-url="{% url 'shipment-new' %}" class="d-flex flex-row">
+        <div class="p-2 list-group-item empty">
+            <a href="#!" data-modal-url="{% url 'shipment-new' %}" class="d-flex flex-row align-items-center">
                 <div class="box-status">
-                    <div class="text-center text-muted">
-                        <div title="Create a Shipment" class="ti ti-md ti-plus"></div>
-                        <div><small>Start Now</small></div>
-                    </div>
+                    {% show_icon icon='ti ti-sm ti-plus' %}
                 </div>
-                <div class="pl-3 overflow-ellipsis flex-shrink-1 align-self-center">
-                    <h4 class="p-0 m-0 text-condensed">Click here to start a new shipment!</h4>
-                    <span>Follow the steps to enter your sample information</span>
+                <div class="px-3 overflow-ellipsis flex-grow-1 align-self-center">
+                    <h5 class="p-0 m-0 text-condensed">Click here to start a new shipment!</h5>
+                    <small class="overflow-ellipsis">Follow the steps to enter sample information</small>
                 </div>
             </a>
         </div>
