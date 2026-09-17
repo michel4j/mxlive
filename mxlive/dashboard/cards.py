@@ -18,13 +18,32 @@ class UpcomingBeamtimeCard(DashboardCard):
         if not lims_cfg.USE_SCHEDULE:
             return False
         context = self.get_context_data(request)
-        return bool(context.get('beamtimes'))
+        return bool(context.get('has_beamtimes') or context.get('beamtimes'))
 
     def get_context_data(self, request=None, **kwargs):
         context = super().get_context_data(request, **kwargs)
         req = request or self.request
         user = getattr(req, 'user', None)
-        context['beamtimes'] = services.get_user_beamtimes(user) if user and user.is_authenticated else []
+        if user and user.is_authenticated:
+            beamtimes = services.get_user_beamtimes(user)
+            months = services.get_user_beamtime_calendar(user, beamtimes=beamtimes)
+            context['calendar_months'] = months
+            context['has_beamtimes'] = any(m.get('has_beamtimes') for m in months) or bool(beamtimes)
+            context['beamtimes'] = beamtimes
+        else:
+            context['calendar_months'] = []
+            context['has_beamtimes'] = False
+            context['beamtimes'] = []
+
+        if 'access_types' not in context:
+            if lims_cfg.USE_SCHEDULE:
+                try:
+                    from basiclive.core.schedule.models import AccessType
+                    context['access_types'] = list(AccessType.objects.all())
+                except Exception:
+                    context['access_types'] = []
+            else:
+                context['access_types'] = []
         return context
 
 

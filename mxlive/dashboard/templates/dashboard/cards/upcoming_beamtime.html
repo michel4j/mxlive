@@ -1,10 +1,132 @@
 {% extends "dashboard/cards/base_card.html" %}
 
-{% block card_body_class %}p-0{% endblock %}
+{% block card_body_class %}px-3 py-2{% endblock %}
 {% block card_content %}
-    <div class="list-group list-group-flush">
-    {% for beamtime in beamtimes %}
-        {% include "schedule/beamtime-list-item.html" %}
-    {% endfor %}
-    </div>
+    {% if calendar_months %}
+        <style>
+            .calendar-mini-month {
+                margin-bottom: 0.75rem;
+            }
+            .calendar-mini-month:last-child {
+                margin-bottom: 0;
+            }
+            .calendar-month-title {
+                font-size: 0.8rem;
+                letter-spacing: 0.05em;
+                font-weight: 600;
+                color: var(--bs-secondary-color, #6c757d);
+            }
+            .calendar-table {
+                table-layout: fixed;
+                width: 100%;
+                margin-bottom: 0;
+            }
+            .calendar-table th {
+                font-size: 0.7rem;
+                padding: 2px 0;
+                font-weight: 500;
+                color: var(--bs-secondary-color, #6c757d);
+            }
+            .calendar-day-cell {
+                padding: 2px !important;
+                vertical-align: middle;
+            }
+            .calendar-day-box {
+                width: 24px;
+                height: 24px;
+                margin: 0 auto;
+                display: flex;
+                align-items: center;
+                justify-content: center;
+                border-radius: 50%;
+                font-size: 0.75rem;
+                line-height: 1;
+                position: relative;
+                transition: transform 0.15s ease, box-shadow 0.15s ease;
+            }
+            .calendar-day-box.other-month {
+                opacity: 0.25;
+            }
+            .calendar-day-box.today {
+                font-weight: 700;
+                box-shadow: inset 0 0 0 1.5px var(--bs-primary, #0d6efd);
+            }
+            .calendar-day-box.has-beamtime {
+                background-color: var(--beamtime-color, #0d6efd);
+                color: #ffffff !important;
+                font-weight: 600;
+                cursor: pointer;
+            }
+            .calendar-day-box.has-beamtime.past-beamtime {
+                opacity: 0.6;
+            }
+            .calendar-day-box.has-beamtime:hover {
+                transform: scale(1.15);
+                box-shadow: 0 2px 6px rgba(0,0,0,0.25);
+            }
+            .legend-dot {
+                width: 8px;
+                height: 8px;
+                border-radius: 50%;
+                display: inline-block;
+            }
+            .legend-label {
+                font-size: 0.68rem;
+            }
+        </style>
+
+        <div class="upcoming-beamtime-calendar">
+            {% for month in calendar_months %}
+                <div class="calendar-mini-month">
+                    <div class="calendar-month-header text-center mb-1">
+                        <span class="calendar-month-title text-uppercase">{{ month.month_name }} {{ month.year }}</span>
+                    </div>
+                    <table class="table table-borderless table-sm calendar-table text-center mb-1">
+                        <thead>
+                            <tr>
+                                {% for header in month.weekday_headers %}
+                                    <th>{{ header }}</th>
+                                {% endfor %}
+                            </tr>
+                        </thead>
+                        <tbody>
+                            {% for week in month.weeks %}
+                                <tr>
+                                    {% for day in week %}
+                                        <td class="calendar-day-cell">
+                                            <div class="calendar-day-box {% if not day.in_month %}other-month text-muted{% endif %} {% if day.is_today %}today{% endif %} {% if day.has_beamtime %}has-beamtime{% if day.is_past %} past-beamtime{% endif %}{% endif %}"
+                                                 {% if day.has_beamtime and day.access_color %}style="--beamtime-color: {{ day.access_color }};"{% endif %}
+                                                 data-date="{{ day.date|date:'Y-m-d' }}">
+                                                <span class="day-number">{{ day.day }}</span>
+                                            </div>
+                                        </td>
+                                    {% endfor %}
+                                </tr>
+                            {% endfor %}
+                        </tbody>
+                    </table>
+                </div>
+                {% if not forloop.last %}
+                    <hr class="my-2 border-secondary opacity-25">
+                {% endif %}
+            {% endfor %}
+
+            {% if access_types %}
+                <div class="calendar-legend d-flex flex-wrap gap-2 justify-content-center pt-2 mt-1 border-top border-secondary border-opacity-10 small text-muted">
+                    {% for access in access_types %}
+                        <div class="d-flex align-items-center gap-1">
+                            <span class="legend-dot" style="background-color: {{ access.color }};"></span>
+                            <span class="legend-label">{{ access.name }}</span>
+                        </div>
+                    {% endfor %}
+                </div>
+            {% endif %}
+        </div>
+    {% else %}
+        <div class="list-group list-group-flush">
+        {% for beamtime in beamtimes %}
+            {% include "schedule/beamtime-list-item.html" %}
+        {% endfor %}
+        </div>
+    {% endif %}
 {% endblock %}

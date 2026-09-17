@@ -900,6 +900,195 @@ class CardQueryDeduplicationTests(SimpleTestCase):
         self.assertEqual(mock_get_beamtimes.call_count, 1)
 
 
+class BeamtimeCalendarServiceTests(SimpleTestCase):
+
+    def setUp(self):
+        User = get_user_model()
+        self.user = User(username='scientist', pk=42)
+        self.anonymous_user = AnonymousUser()
+
+    def test_calendar_generates_three_consecutive_months_by_default(self):
+        from .services import get_user_beamtime_calendar
+        from datetime import date
+
+        ref = date(2026, 9, 15)
+        months = get_user_beamtime_calendar(self.anonymous_user, reference_date=ref)
+        self.assertEqual(len(months), 3)
+
+        self.assertEqual((months[0]['year'], months[0]['month'], months[0]['month_name']), (2026, 9, 'September'))
+        self.assertEqual((months[1]['year'], months[1]['month'], months[1]['month_name']), (2026, 10, 'October'))
+        self.assertEqual((months[2]['year'], months[2]['month'], months[2]['month_name']), (2026, 11, 'November'))
+
+    def test_calendar_handles_year_boundary_transition(self):
+        from .services import get_user_beamtime_calendar
+        from datetime import date
+
+        ref = date(2026, 11, 20)
+        months = get_user_beamtime_calendar(self.anonymous_user, reference_date=ref)
+        self.assertEqual(len(months), 3)
+
+        self.assertEqual((months[0]['year'], months[0]['month']), (2026, 11))
+        self.assertEqual((months[1]['year'], months[1]['month']), (2026, 12))
+        self.assertEqual((months[2]['year'], months[2]['month']), (2027, 1))
+
+    def test_calendar_weeks_and_weekday_headers(self):
+        from .services import get_user_beamtime_calendar
+        from datetime import date
+
+        ref = date(2026, 9, 1)
+        months = get_user_beamtime_calendar(self.anonymous_user, reference_date=ref)
+        september = months[0]
+
+        self.assertEqual(september['weekday_headers'], ['Mo', 'Tu', 'We', 'Th', 'Fr', 'Sa', 'Su'])
+        self.assertGreaterEqual(len(september['weeks']), 4)
+        for week in september['weeks']:
+            self.assertEqual(len(week), 7)
+
+        # First day of Sep 2026 is Tuesday, so first day of week 1 should be Aug 31 with in_month=False
+        first_day = september['weeks'][0][0]
+        self.assertFalse(first_day['in_month'])
+        self.assertEqual(first_day['date'], date(2026, 8, 31))
+
+        # Second day of week 1 is Sep 1 with in_month=True
+        second_day = september['weeks'][0][1]
+        self.assertTrue(second_day['in_month'])
+        self.assertEqual(second_day['date'], date(2026, 9, 1))
+
+    def test_calendar_maps_beamtimes_to_matching_dates(self):
+        from .services import get_user_beamtime_calendar
+        from datetime import date, datetime
+
+        tz = timezone.get_current_timezone()
+        bt_start = timezone.make_aware(datetime(2026, 9, 10, 8, 0, 0), tz)
+        bt_end = timezone.make_aware(datetime(2026, 9, 11, 16, 0, 0), tz)
+
+        mock_bt = MagicMock()
+        mock_bt.pk = 101
+        mock_bt.start = bt_start
+        mock_bt.end = bt_end
+        mock_bt.cancelled = False
+        mock_bt.beamline.acronym = 'CMCF-ID'
+        mock_bt.access.name = 'Remote'
+        mock_bt.access.color = '#336699'
+        mock_bt.shifts = 4
+        mock_bt.start_date_display.return_value = 'Thursday, September 10'
+        mock_bt.start_time_display.return_value = '8AM'
+
+        user = MagicMock()
+        user.pk = 42
+        mock_qs = MagicMock()
+        mock_qs.with_duration.return_value.select_related.return_value.order_by.return_value = [mock_bt]
+        user.beamtime.filter.return_value = mock_qs
+
+        months = get_user_beamtime_calendar(user, reference_date=date(2026, 9, 1))
+        september = months[0]
+        self.assertTrue(september['has_beamtimes'])
+
+        # Find day 10 and day 11 in September
+        days_by_date = {
+            day['date']: day
+            for week in september['weeks']
+            for day in week
+            if day['in_month']
+        }
+
+        day_10 = days_by_date[date(2026, 9, 10)]
+        self.assertTrue(day_10['has_beamtime'])
+        self.assertEqual(day_10['access_color'], '#336699')
+        self.assertEqual(len(day_10['beamtimes']), 1)
+        self.assertEqual(day_10['beamtimes'][0]['beamline'], 'CMCF-ID')
+
+        day_11 = days_by_date[date(2026, 9, 11)]
+        self.assertTrue(day_11['has_beamtime'])
+
+        day_12 = days_by_date[date(2026, 9, 12)]
+        self.assertFalse(day_12['has_beamtime'])
+
+    @patch('mxlive.dashboard.services.get_user_beamtimes')
+    def test_upcoming_beamtime_card_calendar_context_structure(self, mock_get_beamtimes):
+        class MockBeamtime:
+            pk = 10
+            start = timezone.now()
+            end = timezone.now() + timedelta(hours=8)
+            duration = timedelta(hours=8)
+            current = True
+            cancelled = False
+            beamline = MagicMock(acronym='CMCF-BM')
+            access = MagicMock(color='#ff5500')
+            shifts = 1
+            comments = 'Test beamtime'
+
+        mock_get_beamtimes.return_value = [MockBeamtime()]
+        card = card_registry.get_card('upcoming_beamtime')
+        request = RequestFactory().get('/')
+        request.user = self.user
+
+        self.assertTrue(card.is_visible(request))
+        context = card.get_context_data(request)
+        self.assertIn('calendar_months', context)
+        self.assertEqual(len(context['calendar_months']), 3)
+        self.assertTrue(context['has_beamtimes'])
+        self.assertIn('access_types', context)
+        self.assertIn('beamtimes', context)
+        self.assertEqual(len(context['beamtimes']), 1)
+
+    @patch('mxlive.dashboard.services.get_user_beamtimes')
+    def test_upcoming_beamtime_card_visibility_when_empty(self, mock_get_beamtimes):
+        mock_get_beamtimes.return_value = []
+        card = card_registry.get_card('upcoming_beamtime')
+        request = RequestFactory().get('/')
+        request.user = self.user
+
+        self.assertFalse(card.is_visible(request))
+        context = card.get_context_data(request)
+        self.assertFalse(context['has_beamtimes'])
+        self.assertEqual(context['beamtimes'], [])
+
+    @patch('mxlive.dashboard.cards.lims_cfg')
+    @patch('mxlive.dashboard.services.get_user_beamtimes')
+    def test_upcoming_beamtime_card_hidden_when_use_schedule_false(self, mock_get_beamtimes, mock_lims_cfg):
+        mock_lims_cfg.USE_SCHEDULE = False
+        mock_get_beamtimes.return_value = [MagicMock()]
+        card = card_registry.get_card('upcoming_beamtime')
+        request = RequestFactory().get('/')
+        request.user = self.user
+
+        self.assertFalse(card.is_visible(request))
+
+    @patch('mxlive.dashboard.services.get_user_beamtimes')
+    def test_render_upcoming_beamtime_calendar_html(self, mock_get_beamtimes):
+        class MockBeamtime:
+            pk = 10
+            start = timezone.now()
+            end = timezone.now() + timedelta(hours=8)
+            duration = timedelta(hours=8)
+            current = True
+            cancelled = False
+            beamline = MagicMock(acronym='CMCF-BM')
+            access = MagicMock(color='#ff5500')
+            shifts = 1
+            comments = 'Test beamtime'
+
+        class MockAccessType:
+            name = 'Remote'
+            color = '#ff5500'
+
+        mock_get_beamtimes.return_value = [MockBeamtime()]
+        card = card_registry.get_card('upcoming_beamtime')
+        request = RequestFactory().get('/')
+        request.user = self.user
+
+        rendered = card.render(request=request)
+        self.assertIn('upcoming-beamtime-calendar', rendered)
+        self.assertIn('calendar-mini-month', rendered)
+        self.assertIn('calendar-table', rendered)
+        self.assertIn('<th>Mo</th>', rendered)
+        self.assertIn('has-beamtime', rendered)
+        self.assertIn('--beamtime-color: #ff5500', rendered)
+        self.assertIn('data-date=', rendered)
+
+
+
 
 
 

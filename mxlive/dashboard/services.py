@@ -1,4 +1,5 @@
-from datetime import timedelta
+import calendar
+from datetime import datetime, date, time, timedelta
 from django.db.models import Q, Count, Max, Case, When, Value, BooleanField
 from django.utils import timezone
 
@@ -54,6 +55,190 @@ def get_user_beamtimes(user):
             output_field=BooleanField()
         )
     ).order_by('-current', 'start')
+
+
+def get_user_beamtime_calendar(user, reference_date=None, num_months=3, beamtimes=None):
+    """
+    Generate a multi-month calendar data structure (default 3 months) for the specified user,
+    annotating days with scheduled beamtime information, Access Mode colors, and shift details.
+
+    :param user: User object
+    :param reference_date: Starting reference date (defaults to today's local date)
+    :param num_months: Number of sequential months to include (default 3)
+    :param beamtimes: Optional pre-fetched or mocked beamtimes list/queryset
+    :return: List of month dictionaries containing weeks and days
+    """
+    if reference_date is None:
+        reference_date = timezone.localtime().date()
+    elif isinstance(reference_date, datetime):
+        reference_date = timezone.localtime(reference_date).date()
+
+    today = timezone.localtime().date()
+    now = timezone.now()
+    tz = timezone.get_current_timezone()
+
+    # Calculate month and year sequences
+    month_seq = []
+    for i in range(num_months):
+        m = (reference_date.month - 1 + i) % 12 + 1
+        y = reference_date.year + (reference_date.month - 1 + i) // 12
+        month_seq.append((y, m))
+
+    # Determine total window date range
+    first_y, first_m = month_seq[0]
+    last_y, last_m = month_seq[-1]
+    _, last_days_in_last_m = calendar.monthrange(last_y, last_m)
+
+    window_start_date = date(first_y, first_m, 1)
+    window_end_date = date(last_y, last_m, last_days_in_last_m)
+
+    window_start = timezone.make_aware(datetime.combine(window_start_date, time.min), tz)
+    window_end = timezone.make_aware(datetime.combine(window_end_date, time.max), tz)
+
+    # Fetch user's non-cancelled beamtimes intersecting the window if not provided
+    if beamtimes is None and user and getattr(user, 'pk', None) and lims_cfg.USE_SCHEDULE:
+        try:
+            from basiclive.core.schedule.models import Beamtime
+            beamtimes = list(
+                user.beamtime.filter(
+                    end__gte=window_start,
+                    start__lte=window_end,
+                    cancelled=False
+                ).with_duration().select_related('beamline', 'access', 'project').order_by('start')
+            )
+        except Exception:
+            beamtimes = []
+    elif beamtimes is None:
+        beamtimes = []
+
+    # Map beamtimes with helper details
+    processed_beamtimes = []
+    for bt in beamtimes:
+        if isinstance(bt, str):
+            continue
+
+        bt_start = getattr(bt, 'start', None)
+        bt_end = getattr(bt, 'end', None)
+        bt_duration = getattr(bt, 'duration', None)
+
+        if bt_start is not None and not isinstance(bt_start, datetime):
+            bt_start = now
+        if bt_end is not None and not isinstance(bt_end, datetime):
+            bt_end = now + timedelta(hours=8)
+
+        if bt_start and not bt_end and bt_duration:
+            bt_end = bt_start + bt_duration
+        elif bt_start and not bt_end:
+            bt_end = bt_start + timedelta(hours=8)
+        elif not bt_start:
+            bt_start = now
+            bt_end = now + timedelta(hours=8)
+
+        access = getattr(bt, 'access', None)
+        access_name = getattr(access, 'name', '') if access else ''
+        if not isinstance(access_name, str):
+            access_name = str(access_name) if access_name else ''
+        access_color = getattr(access, 'color', '#6c757d') if access else '#6c757d'
+        if not isinstance(access_color, str):
+            access_color = '#6c757d'
+
+        beamline = getattr(bt, 'beamline', None)
+        acronym = getattr(beamline, 'acronym', '') if beamline else ''
+        if not isinstance(acronym, str):
+            acronym = str(acronym) if acronym else ''
+
+        shifts = getattr(bt, 'shifts', None)
+        if shifts is None or not isinstance(shifts, (int, float)):
+            try:
+                shifts = int((bt_end - bt_start).total_seconds() // (8 * 3600)) or 1
+            except Exception:
+                shifts = 1
+
+        is_current = (bt_start <= now <= bt_end)
+        is_past = (bt_end < now)
+
+        start_display = bt_start.strftime('%b %d, %Y')
+        if hasattr(bt, 'start_date_display') and callable(bt.start_date_display):
+            try:
+                start_display = bt.start_date_display()
+            except Exception:
+                pass
+
+        time_display = bt_start.strftime('%H:%M')
+        if hasattr(bt, 'start_time_display') and callable(bt.start_time_display):
+            try:
+                time_display = bt.start_time_display()
+            except Exception:
+                pass
+
+        processed_beamtimes.append({
+            'object': bt,
+            'pk': getattr(bt, 'pk', None),
+            'beamline': acronym,
+            'access_name': access_name,
+            'access_color': access_color,
+            'start': bt_start,
+            'end': bt_end,
+            'shifts': shifts,
+            'is_current': is_current,
+            'is_past': is_past,
+            'start_display': start_display,
+            'time_display': time_display,
+            'comments': getattr(bt, 'comments', ''),
+        })
+
+    # Build calendar grids using Python's standard calendar module
+    cal = calendar.Calendar(firstweekday=calendar.MONDAY)
+    weekday_headers = ['Mo', 'Tu', 'We', 'Th', 'Fr', 'Sa', 'Su']
+    months_data = []
+
+    for y, m in month_seq:
+        month_weeks = []
+        month_has_beamtime = False
+
+        for week in cal.monthdatescalendar(y, m):
+            week_days = []
+            for d in week:
+                in_month = (d.month == m)
+                is_day_today = (d == today)
+                is_day_past = (d < today)
+
+                # Find beamtimes that intersect with this day
+                day_start = timezone.make_aware(datetime.combine(d, time.min), tz)
+                day_end = timezone.make_aware(datetime.combine(d, time.max), tz)
+
+                day_beamtimes = [
+                    bt for bt in processed_beamtimes
+                    if bt['start'] < day_end and bt['end'] > day_start
+                ]
+
+                if day_beamtimes and in_month:
+                    month_has_beamtime = True
+
+                primary_color = day_beamtimes[0]['access_color'] if day_beamtimes else None
+
+                week_days.append({
+                    'date': d,
+                    'day': d.day,
+                    'in_month': in_month,
+                    'is_today': is_day_today,
+                    'is_past': is_day_past,
+                    'beamtimes': day_beamtimes,
+                    'has_beamtime': bool(day_beamtimes),
+                    'access_color': primary_color,
+                })
+            month_weeks.append(week_days)
+
+        months_data.append({
+            'year': y,
+            'month': m,
+            'month_name': calendar.month_name[m],
+            'weekday_headers': weekday_headers,
+            'weeks': month_weeks,
+            'has_beamtimes': month_has_beamtime,
+        })
+
+    return months_data
 
 
 def get_user_sessions(user, limit: int = 7):
