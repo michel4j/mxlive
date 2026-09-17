@@ -124,7 +124,8 @@ $rgb-category-colors: (
     color: var(--bl-cat-color);
     background-color: var(--bl-cat-bg);
   }
-  .bg-cat-#{key} {
+  .bg-cat-#{$key} {
+    --bl-cat-bg: rgba(#{$r}, #{$g}, #{$b}, 0.15);
     background-color: var(--bl-cat-bg);
   }
 }
