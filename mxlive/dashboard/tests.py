@@ -1132,6 +1132,123 @@ class BeamtimeCalendarServiceTests(SimpleTestCase):
         self.assertIn('/users/sessions/404/', rendered)
         self.assertIn('initCalendarPopovers', rendered)
 
+    def test_calendar_handles_leap_year_february_29(self):
+        from .services import get_user_beamtime_calendar
+        from datetime import date
+
+        # 2028 is a leap year; reference starting January 2028
+        ref = date(2028, 1, 15)
+        months = get_user_beamtime_calendar(self.anonymous_user, reference_date=ref)
+        self.assertEqual(len(months), 3)
+
+        february = months[1]
+        self.assertEqual(february['month_name'], 'February')
+        self.assertEqual(february['year'], 2028)
+
+        feb_days = [
+            day for week in february['weeks']
+            for day in week
+            if day['in_month']
+        ]
+        self.assertEqual(len(feb_days), 29)
+        self.assertEqual(feb_days[-1]['day'], 29)
+        self.assertEqual(feb_days[-1]['date'], date(2028, 2, 29))
+
+    def test_calendar_handles_non_leap_year_february_28(self):
+        from .services import get_user_beamtime_calendar
+        from datetime import date
+
+        # 2027 is not a leap year; reference starting February 2027
+        ref = date(2027, 2, 1)
+        months = get_user_beamtime_calendar(self.anonymous_user, reference_date=ref)
+        february = months[0]
+        self.assertEqual(february['month_name'], 'February')
+        feb_days = [
+            day for week in february['weeks']
+            for day in week
+            if day['in_month']
+        ]
+        self.assertEqual(len(feb_days), 28)
+        self.assertEqual(feb_days[-1]['day'], 28)
+
+    def test_calendar_multi_day_beamtime_spans_multiple_days(self):
+        from .services import get_user_beamtime_calendar
+        from datetime import date, datetime
+
+        tz = timezone.get_current_timezone()
+        # 3-day beamtime from April 14 08:00 to April 16 16:00
+        bt_start = timezone.make_aware(datetime(2027, 4, 14, 8, 0, 0), tz)
+        bt_end = timezone.make_aware(datetime(2027, 4, 16, 16, 0, 0), tz)
+
+        mock_bt = MagicMock()
+        mock_bt.pk = 202
+        mock_bt.start = bt_start
+        mock_bt.end = bt_end
+        mock_bt.duration = timedelta(days=2, hours=8)
+        mock_bt.cancelled = False
+        mock_bt.beamline.acronym = '08B1-1'
+        mock_bt.access.name = 'Mail-in'
+        mock_bt.access.color = '#28a745'
+        mock_bt.shifts = 7
+        mock_bt.start_date_display.return_value = 'Wednesday, April 14'
+        mock_bt.start_time_display.return_value = '08:00'
+
+        months = get_user_beamtime_calendar(
+            self.anonymous_user,
+            reference_date=date(2027, 4, 1),
+            beamtimes=[mock_bt]
+        )
+        april = months[0]
+        days_by_date = {
+            day['date']: day
+            for week in april['weeks']
+            for day in week
+            if day['in_month']
+        }
+
+        # Days 14, 15, 16 should all have beamtime
+        self.assertTrue(days_by_date[date(2027, 4, 14)]['has_beamtime'])
+        self.assertTrue(days_by_date[date(2027, 4, 15)]['has_beamtime'])
+        self.assertTrue(days_by_date[date(2027, 4, 16)]['has_beamtime'])
+
+        # Days 13 and 17 should NOT have beamtime
+        self.assertFalse(days_by_date[date(2027, 4, 13)]['has_beamtime'])
+        self.assertFalse(days_by_date[date(2027, 4, 17)]['has_beamtime'])
+
+        # Color and beamline check
+        day_15 = days_by_date[date(2027, 4, 15)]
+        self.assertEqual(day_15['access_color'], '#28a745')
+        self.assertEqual(day_15['beamtimes'][0]['beamline'], '08B1-1')
+
+    def test_calendar_excludes_cancelled_beamtimes(self):
+        from .services import get_user_beamtime_calendar
+        from datetime import date, datetime
+
+        tz = timezone.get_current_timezone()
+        bt_start = timezone.make_aware(datetime(2026, 10, 5, 8, 0, 0), tz)
+        bt_end = timezone.make_aware(datetime(2026, 10, 5, 16, 0, 0), tz)
+
+        mock_bt = MagicMock()
+        mock_bt.pk = 303
+        mock_bt.start = bt_start
+        mock_bt.end = bt_end
+        mock_bt.cancelled = True
+
+        user = MagicMock()
+        user.pk = 42
+        mock_qs = MagicMock()
+        # Non-cancelled filter should return empty list
+        mock_qs.with_duration.return_value.select_related.return_value.order_by.return_value = []
+        user.beamtime.filter.return_value = mock_qs
+
+        months = get_user_beamtime_calendar(user, reference_date=date(2026, 10, 1))
+        october = months[0]
+        self.assertFalse(october['has_beamtimes'])
+        user.beamtime.filter.assert_called_once()
+        filter_kwargs = user.beamtime.filter.call_args[1]
+        self.assertFalse(filter_kwargs['cancelled'])
+
+
 
 
 
