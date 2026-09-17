@@ -182,17 +182,26 @@
                     if (typeof bootstrap === 'undefined' || !bootstrap.Popover) return;
                     const triggers = document.querySelectorAll('.upcoming-beamtime-calendar [data-bs-toggle="popover"]');
                     triggers.forEach(function(el) {
-                        if (!bootstrap.Popover.getInstance(el)) {
-                            const target = document.querySelector(el.dataset.popoverTarget);
-                            const titleHtml = target ? target.querySelector('.popover-heading').innerHTML : '';
-                            const bodyHtml = target ? target.querySelector('.popover-body-content').innerHTML : '';
-                            new bootstrap.Popover(el, {
-                                container: 'body',
-                                html: true,
-                                title: titleHtml,
-                                content: bodyHtml
-                            });
+                        const existing = bootstrap.Popover.getInstance(el);
+                        if (existing) {
+                            existing.dispose();
                         }
+                        const target = document.querySelector(el.dataset.popoverTarget);
+                        if (!target) return;
+                        const titleEl = target.querySelector('.popover-heading');
+                        const bodyEl = target.querySelector('.popover-body-content');
+                        const titleHtml = titleEl ? titleEl.innerHTML : '';
+                        const bodyHtml = bodyEl ? bodyEl.innerHTML : '';
+
+                        new bootstrap.Popover(el, {
+                            container: 'body',
+                            html: true,
+                            sanitize: false,
+                            trigger: 'click',
+                            placement: 'auto',
+                            title: titleHtml,
+                            content: bodyHtml
+                        });
                     });
                 }
 
@@ -202,8 +211,17 @@
                     initCalendarPopovers();
                 }
 
+                // Also run on window load or jQuery ready in case base.html's $(document).ready executes later
+                window.addEventListener('load', initCalendarPopovers);
+                if (window.jQuery) {
+                    jQuery(document).ready(initCalendarPopovers);
+                }
+
+                // Dismiss popovers when clicking outside
                 document.addEventListener('click', function(e) {
-                    if (!e.target.closest('.popover') && !e.target.closest('.upcoming-beamtime-calendar [data-bs-toggle="popover"]')) {
+                    const isPopover = e.target.closest('.popover');
+                    const isTrigger = e.target.closest('.upcoming-beamtime-calendar [data-bs-toggle="popover"]');
+                    if (!isPopover && !isTrigger) {
                         document.querySelectorAll('.upcoming-beamtime-calendar [data-bs-toggle="popover"]').forEach(function(el) {
                             const popover = bootstrap.Popover.getInstance(el);
                             if (popover) {
