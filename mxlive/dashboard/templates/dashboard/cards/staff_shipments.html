@@ -1,6 +1,8 @@
+{% extends "dashboard/cards/base_card.html" %}
 {% load bl_icons %}
-<div class="card text-bg-cat-9 mb-4">
-    <div class="card-header text-center text-wide text-muted"><small>SHIPMENTS</small></div>
+
+{% block card_body_class %}p-0{% endblock %}
+{% block card_content %}
     <div class="list-group list-group-flush">
         {% for shipment in shipments %}
             {% include "lims/details/shipment-list-item.html" %}
@@ -17,4 +19,4 @@
             </a>
         </div>
     </div>
-</div>
+{% endblock %}

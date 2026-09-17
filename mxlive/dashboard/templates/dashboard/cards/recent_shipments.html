@@ -1,5 +1,7 @@
-<div class="card mb-4">
-    <div class="card-header text-center text-wide text-muted"><small>RECENT SHIPMENTS</small></div>
+{% extends "dashboard/cards/base_card.html" %}
+
+{% block card_body_class %}p-0{% endblock %}
+{% block card_content %}
     <div class="list-group list-group-flush">
         <div class="list-group-item empty p-2">
             <a href="#!" data-modal-url="{% url 'shipment-new' %}" class="d-flex flex-row">
@@ -19,4 +21,4 @@
             {% include "lims/details/shipment-list-item.html" %}
         {% endfor %}
     </div>
-</div>
+{% endblock %}

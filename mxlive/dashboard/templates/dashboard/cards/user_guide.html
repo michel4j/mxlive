@@ -1,11 +1,12 @@
+{% extends "dashboard/cards/base_card.html" %}
 {% load bl_guides %}
 {% load bl_icons %}
 {% load markup %}
 {% load static %}
 
-<div class="card text-bg-cat-7 mb-4">
-    <div class="card-header text-center text-wide text-muted"><small>USER GUIDES</small></div>
-    <div class="card-body p-0">
+{% block card_class %}text-bg-cat-7{% endblock %}
+{% block card_body_class %}p-0{% endblock %}
+{% block card_content %}
         <div class="accordion accordion-flush" id="guide-items">
           {% for guide in guides %}
           <div class="accordion-item">
@@ -95,8 +96,7 @@
           </div>
           {% endfor %}
         </div>
-    </div>
-</div>
+{% endblock %}
 
 
 

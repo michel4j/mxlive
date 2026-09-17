@@ -1,5 +1,7 @@
-<div class="card mb-4">
-    <div class="card-header text-center text-wide text-muted"><small class="">BEAMLINES</small></div>
+{% extends "dashboard/cards/base_card.html" %}
+
+{% block card_body_class %}p-0{% endblock %}
+{% block card_content %}
     <div class="list-group list-group-flush list-group-hover">
     {% for bl in beamlines %}
         {% with bl.active_automounter as automounter %}
@@ -17,4 +19,4 @@
         {% endwith %}
     {% endfor %}
     </div>
-</div>
+{% endblock %}

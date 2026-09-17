@@ -1,7 +1,8 @@
+{% extends "dashboard/cards/base_card.html" %}
 {% load bl_icons %}
-{% if support %}
-<div class="card mb-4">
-    <div class="card-header text-center text-wide text-muted"><small>LOCAL CONTACT</small></div>
+
+{% block card_body_class %}p-0{% endblock %}
+{% block card_content %}
     <div class="list-group list-group-flush">
         <div class="list-group-item p-2">
             <div class="d-flex flex-row">
@@ -25,5 +26,4 @@
             </div>
         </div>
     </div>
-</div>
-{% endif %}
+{% endblock %}

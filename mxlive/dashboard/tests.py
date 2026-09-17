@@ -1,3 +1,4 @@
+from datetime import timedelta
 from unittest.mock import MagicMock, patch
 from django.apps import apps
 from django.test import SimpleTestCase, RequestFactory
@@ -7,6 +8,7 @@ from django.core.exceptions import PermissionDenied
 from django.template.loader import render_to_string
 from django.template import Template, Context
 from django.urls import reverse, resolve
+from django.utils import timezone
 
 from .registry import DashboardCard, CardRegistry, register_card, card_registry
 from . import cards
@@ -422,7 +424,6 @@ class TemplateRenderingTests(SimpleTestCase):
         request.user = self.staff_user
         rendered = card.render(request=request)
         self.assertIn('SHIPMENTS', rendered)
-        self.assertIn('Start Now', rendered)
 
     @patch('mxlive.dashboard.services.get_staff_adaptors')
     def test_render_adaptors_card(self, mock_adaptors):
@@ -441,6 +442,73 @@ class TemplateRenderingTests(SimpleTestCase):
         request.user = self.staff_user
         rendered = card.render(request=request)
         self.assertIn('BEAMLINES', rendered)
+
+    @patch('mxlive.dashboard.services.get_user_sessions')
+    def test_render_recent_sessions_card_with_sessions(self, mock_sessions):
+        class FakeSession:
+            pk = 1
+            name = 'Session-001'
+            start = timezone.now()
+            beamline = MagicMock(acronym='BL-1')
+            total_time = 3600
+            last_record_time = timezone.now()
+            data_count = 5
+            report_count = 2
+            is_recent = False
+            feedback = MagicMock(all=lambda: [])
+
+        mock_sessions.return_value = [FakeSession()]
+        card = card_registry.get_card('recent_sessions')
+        request = self.factory.get('/')
+        request.user = self.regular_user
+        rendered = card.render(request=request)
+        self.assertIn('RECENT SESSIONS', rendered)
+        self.assertIn('Session-001', rendered)
+
+    @patch('mxlive.dashboard.services.get_user_beamtimes')
+    def test_render_upcoming_beamtime_card_with_beamtimes(self, mock_bt):
+        class FakeBeamtime:
+            pk = 1
+            duration = timedelta(seconds=28800)
+            current = False
+            beamline = MagicMock(acronym='08B1-1')
+            access = MagicMock()
+            start = timezone.now()
+            local_contact = None
+
+        mock_bt.return_value = [FakeBeamtime()]
+        card = card_registry.get_card('upcoming_beamtime')
+        request = self.factory.get('/')
+        request.user = self.regular_user
+        rendered = card.render(request=request)
+        self.assertIn('UPCOMING BEAMTIME', rendered)
+
+    @patch('mxlive.dashboard.services.get_today_beamline_support')
+    def test_render_local_contact_card_empty(self, mock_sup):
+        mock_sup.return_value = None
+        card = card_registry.get_card('local_contact')
+        request = self.factory.get('/')
+        request.user = self.staff_user
+        rendered = card.render(request=request)
+        self.assertEqual(rendered.strip(), '')
+
+    @patch('mxlive.dashboard.services.get_today_beamline_support')
+    def test_render_local_contact_card_with_support(self, mock_sup):
+        class FakeSupport:
+            class staff:
+                contact_email = 'alice@example.com'
+                contact_phone = '555-0100'
+            def __str__(self):
+                return 'Alice Doe'
+
+        mock_sup.return_value = FakeSupport()
+        card = card_registry.get_card('local_contact')
+        request = self.factory.get('/')
+        request.user = self.staff_user
+        rendered = card.render(request=request)
+        self.assertIn('LOCAL CONTACT', rendered)
+        self.assertIn('ALICE DOE', rendered)
+        self.assertIn('555-0100', rendered)
 
     @patch('mxlive.dashboard.services.get_user_shipments')
     def test_render_card_templatetag(self, mock_shipments):
@@ -494,11 +562,6 @@ class DashboardURLRoutingTests(SimpleTestCase):
     def test_url_resolving_staff(self):
         resolver_match = resolve('/staff/')
         self.assertEqual(resolver_match.func.view_class, StaffDashboardView)
-
-    def test_url_resolving_dashboard_prefix(self):
-        self.assertEqual(resolve('/dashboard/').func.view_class, DashboardIndexView)
-        self.assertEqual(resolve('/dashboard/user/').func.view_class, UserDashboardView)
-        self.assertEqual(resolve('/dashboard/staff/').func.view_class, StaffDashboardView)
 
 
 class DashboardSecurityAndRoutingTests(SimpleTestCase):

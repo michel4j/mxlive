@@ -24,6 +24,10 @@ class UpcomingBeamtimeCard(DashboardCard):
         beamtimes = services.get_user_beamtimes(user)
         return beamtimes.exists() if hasattr(beamtimes, 'exists') else bool(beamtimes)
 
+    def has_content(self, context, request=None):
+        beamtimes = context.get('beamtimes')
+        return beamtimes.exists() if hasattr(beamtimes, 'exists') else bool(beamtimes)
+
     def get_context_data(self, request=None, **kwargs):
         context = super().get_context_data(request, **kwargs)
         req = request or self.request
@@ -58,6 +62,10 @@ class RecentSessionsCard(DashboardCard):
     roles = ('user',)
     column = 'center'
 
+    def has_content(self, context, request=None):
+        sessions = context.get('sessions')
+        return sessions.exists() if hasattr(sessions, 'exists') else bool(sessions)
+
     def get_context_data(self, request=None, **kwargs):
         context = super().get_context_data(request, **kwargs)
         req = request or self.request
@@ -69,7 +77,7 @@ class RecentSessionsCard(DashboardCard):
 @register_card
 class UserGuideCard(DashboardCard):
     name = 'user_guide'
-    title = 'GUIDE'
+    title = 'USER GUIDES'
     template_name = 'dashboard/cards/user_guide.html'
     order = 40
     roles = ('user', 'staff')
@@ -154,6 +162,9 @@ class LocalContactCard(DashboardCard):
         if not super().is_visible(request):
             return False
         return bool(lims_cfg.USE_CRM)
+
+    def has_content(self, context, request=None):
+        return bool(context.get('support'))
 
     def get_context_data(self, request=None, **kwargs):
         context = super().get_context_data(request, **kwargs)

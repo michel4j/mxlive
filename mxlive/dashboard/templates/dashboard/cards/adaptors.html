@@ -1,10 +1,10 @@
-<div class="card text-bg-cat-3 mb-4">
-    <div class="card-header text-center text-wide text-muted"><small>ADAPTORS</small></div>
-    <div class="card-body overflow-auto fixed-height-350">
-        <div class="row g-3">
-            {% for container in adaptors %}
-                {% include "lims/details/container-item.html" %}
-            {% endfor %}
-        </div>
+{% extends "dashboard/cards/base_card.html" %}
+{% block card_class %}text-bg-cat-3{% endblock %}
+{% block card_body_class %}p-2 overflow-auto fixed-height-350{% endblock %}
+{% block card_content %}
+    <div class="row g-2">
+    {% for container in adaptors %}
+        {% include "lims/details/container-item.html" %}
+    {% endfor %}
     </div>
-</div>
+{% endblock %}

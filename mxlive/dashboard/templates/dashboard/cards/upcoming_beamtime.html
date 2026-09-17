@@ -1,10 +1,10 @@
-{% if beamtimes %}
-<div class="card mb-4">
-    <div class="card-header text-center text-wide text-muted"><small class="">UPCOMING BEAMTIME</small></div>
+{% extends "dashboard/cards/base_card.html" %}
+
+{% block card_body_class %}p-0{% endblock %}
+{% block card_content %}
     <div class="list-group list-group-flush">
     {% for beamtime in beamtimes %}
         {% include "schedule/beamtime-list-item.html" %}
     {% endfor %}
     </div>
-</div>
-{% endif %}
+{% endblock %}

@@ -49,17 +49,30 @@ class DashboardCard:
         context.update(kwargs)
         return context
 
+    def has_content(self, context, request=None):
+        """
+        Determine if the card has content to display.
+        Override to suppress rendering when card data is empty.
+        """
+        return True
+
     def render(self, context=None, request=None):
         """
         Render the card HTML using its template and context data.
         """
+        req = request or self.request
+        if req and not self.is_visible(req):
+            return mark_safe('')
+
         if not self.template_name:
             return mark_safe('')
 
-        req = request or self.request
         card_context = self.get_context_data(req)
         if context:
             card_context.update(context)
+
+        if not self.has_content(card_context, request=req):
+            return mark_safe('')
 
         return mark_safe(render_to_string(self.template_name, card_context, request=req))
 
