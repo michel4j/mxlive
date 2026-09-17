@@ -1087,6 +1087,51 @@ class BeamtimeCalendarServiceTests(SimpleTestCase):
         self.assertIn('--beamtime-color: #ff5500', rendered)
         self.assertIn('data-date=', rendered)
 
+    @patch('mxlive.dashboard.services.get_user_beamtimes')
+    def test_render_upcoming_beamtime_popover_and_modal_linkages(self, mock_get_beamtimes):
+        class MockSession:
+            pk = 404
+            name = 'session-404'
+
+        class MockLocalContact:
+            pk = 55
+            first_name = 'Jane'
+            last_name = 'Scientist'
+            def __str__(self):
+                return 'Jane Scientist'
+
+        class MockBeamtime:
+            pk = 77
+            start = timezone.now()
+            end = timezone.now() + timedelta(hours=8)
+            duration = timedelta(hours=8)
+            current = True
+            cancelled = False
+            beamline = MagicMock(acronym='CMCF-ID')
+            access = MagicMock(color='#0088cc')
+            access.name = 'Remote'
+            shifts = 2
+            comments = 'High resolution dataset'
+            local_contact = MockLocalContact()
+
+            def sessions(self):
+                return [MockSession()]
+
+        mock_get_beamtimes.return_value = [MockBeamtime()]
+        card = card_registry.get_card('upcoming_beamtime')
+        request = RequestFactory().get('/')
+        request.user = self.user
+
+        rendered = card.render(request=request)
+        self.assertIn('data-bs-toggle="popover"', rendered)
+        self.assertIn('data-popover-target=', rendered)
+        self.assertIn('popover-template', rendered)
+        self.assertIn('popover-body-content', rendered)
+        self.assertIn('data-modal-url="/calendar/beamtime/77/info/"', rendered)
+        self.assertIn('/calendar/support/55/info/?current=True', rendered)
+        self.assertIn('/users/sessions/404/', rendered)
+        self.assertIn('initCalendarPopovers', rendered)
+
 
 
 

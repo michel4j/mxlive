@@ -73,6 +73,15 @@
             .legend-label {
                 font-size: 0.68rem;
             }
+            .beamtime-popover {
+                max-width: 260px;
+                font-size: 0.8rem;
+            }
+            .btn-xs {
+                padding: 0.15rem 0.4rem;
+                font-size: 0.75rem;
+                border-radius: 0.2rem;
+            }
         </style>
 
         <div class="upcoming-beamtime-calendar">
@@ -94,11 +103,55 @@
                                 <tr>
                                     {% for day in week %}
                                         <td class="calendar-day-cell">
-                                            <div class="calendar-day-box {% if not day.in_month %}other-month text-muted{% endif %} {% if day.is_today %}today{% endif %} {% if day.has_beamtime %}has-beamtime{% if day.is_past %} past-beamtime{% endif %}{% endif %}"
-                                                 {% if day.has_beamtime and day.access_color %}style="--beamtime-color: {{ day.access_color }};"{% endif %}
-                                                 data-date="{{ day.date|date:'Y-m-d' }}">
-                                                <span class="day-number">{{ day.day }}</span>
-                                            </div>
+                                            {% if day.has_beamtime %}
+                                                <div class="calendar-day-box {% if not day.in_month %}other-month text-muted{% endif %} {% if day.is_today %}today{% endif %} has-beamtime{% if day.is_past %} past-beamtime{% endif %}"
+                                                     style="--beamtime-color: {{ day.access_color }};"
+                                                     tabindex="0"
+                                                     role="button"
+                                                     data-bs-toggle="popover"
+                                                     data-bs-trigger="click"
+                                                     data-bs-html="true"
+                                                     data-bs-placement="auto"
+                                                     data-bs-custom-class="beamtime-popover shadow"
+                                                     data-popover-target="#popover-{{ day.date|date:'Ymd' }}"
+                                                     data-date="{{ day.date|date:'Y-m-d' }}">
+                                                    <span class="day-number">{{ day.day }}</span>
+                                                </div>
+                                                <div id="popover-{{ day.date|date:'Ymd' }}" class="d-none popover-template">
+                                                    <div class="popover-heading fw-bold text-condensed">{{ day.date|date:'l, M j, Y' }}</div>
+                                                    <div class="popover-body-content">
+                                                        {% for bt in day.beamtimes %}
+                                                            <div class="beamtime-popover-item {% if not forloop.last %}border-bottom pb-2 mb-2{% endif %}">
+                                                                <div class="d-flex align-items-center justify-content-between mb-1">
+                                                                    <span class="badge" style="background-color: {{ bt.access_color }}; color: #fff;">{{ bt.beamline }}</span>
+                                                                    <span class="small text-muted fw-semibold">{{ bt.access_name }}</span>
+                                                                </div>
+                                                                <div class="small text-muted mb-2">
+                                                                    <strong>{{ bt.time_display }}</strong> &bull; {{ bt.shifts }} shift{{ bt.shifts|pluralize }}
+                                                                </div>
+                                                                <div class="btn-group btn-group-sm w-100">
+                                                                    {% if bt.pk %}
+                                                                        <a href="#!" class="btn btn-outline-info btn-xs" data-modal-url="{% url 'beamtime-info' bt.pk %}" title="Beamtime Information">Info</a>
+                                                                    {% endif %}
+                                                                    {% if bt.is_current and bt.sessions %}
+                                                                        {% for session in bt.sessions %}
+                                                                            <a href="{% url 'session-detail' session.pk %}" class="btn btn-outline-primary btn-xs" title="View Session">Session</a>
+                                                                        {% endfor %}
+                                                                    {% endif %}
+                                                                    {% if bt.local_contact %}
+                                                                        <a href="#!" class="btn btn-outline-secondary btn-xs" data-modal-url="{% url 'support-info' bt.local_contact.pk %}?current={{ bt.is_current|yesno:'True,False' }}" title="Local Contact Support">Support</a>
+                                                                    {% endif %}
+                                                                </div>
+                                                            </div>
+                                                        {% endfor %}
+                                                    </div>
+                                                </div>
+                                            {% else %}
+                                                <div class="calendar-day-box {% if not day.in_month %}other-month text-muted{% endif %} {% if day.is_today %}today{% endif %}"
+                                                     data-date="{{ day.date|date:'Y-m-d' }}">
+                                                    <span class="day-number">{{ day.day }}</span>
+                                                </div>
+                                            {% endif %}
                                         </td>
                                     {% endfor %}
                                 </tr>
@@ -122,6 +175,45 @@
                 </div>
             {% endif %}
         </div>
+
+        <script>
+            (function() {
+                function initCalendarPopovers() {
+                    if (typeof bootstrap === 'undefined' || !bootstrap.Popover) return;
+                    const triggers = document.querySelectorAll('.upcoming-beamtime-calendar [data-bs-toggle="popover"]');
+                    triggers.forEach(function(el) {
+                        if (!bootstrap.Popover.getInstance(el)) {
+                            const target = document.querySelector(el.dataset.popoverTarget);
+                            const titleHtml = target ? target.querySelector('.popover-heading').innerHTML : '';
+                            const bodyHtml = target ? target.querySelector('.popover-body-content').innerHTML : '';
+                            new bootstrap.Popover(el, {
+                                container: 'body',
+                                html: true,
+                                title: titleHtml,
+                                content: bodyHtml
+                            });
+                        }
+                    });
+                }
+
+                if (document.readyState === 'loading') {
+                    document.addEventListener('DOMContentLoaded', initCalendarPopovers);
+                } else {
+                    initCalendarPopovers();
+                }
+
+                document.addEventListener('click', function(e) {
+                    if (!e.target.closest('.popover') && !e.target.closest('.upcoming-beamtime-calendar [data-bs-toggle="popover"]')) {
+                        document.querySelectorAll('.upcoming-beamtime-calendar [data-bs-toggle="popover"]').forEach(function(el) {
+                            const popover = bootstrap.Popover.getInstance(el);
+                            if (popover) {
+                                popover.hide();
+                            }
+                        });
+                    }
+                });
+            })();
+        </script>
     {% else %}
         <div class="list-group list-group-flush">
         {% for beamtime in beamtimes %}

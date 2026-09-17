@@ -171,6 +171,15 @@ def get_user_beamtime_calendar(user, reference_date=None, num_months=3, beamtime
             except Exception:
                 pass
 
+        sessions = []
+        if is_current and hasattr(bt, 'sessions') and callable(bt.sessions):
+            try:
+                sessions = list(bt.sessions())
+            except Exception:
+                sessions = []
+
+        local_contact = getattr(bt, 'local_contact', None)
+
         processed_beamtimes.append({
             'object': bt,
             'pk': getattr(bt, 'pk', None),
@@ -182,6 +191,8 @@ def get_user_beamtime_calendar(user, reference_date=None, num_months=3, beamtime
             'shifts': shifts,
             'is_current': is_current,
             'is_past': is_past,
+            'sessions': sessions,
+            'local_contact': local_contact,
             'start_display': start_display,
             'time_display': time_display,
             'comments': getattr(bt, 'comments', ''),
