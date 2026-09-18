@@ -15,17 +15,15 @@ Including another URLconf
 """
 
 
+from basiclive.core.lims.conf import settings as lims_settings
+from basiclive.core.lims.views import ProxyView
 from django.conf import settings
 from django.conf.urls import include
 from django.conf.urls.static import static
 from django.contrib import admin
-from django.contrib.auth.decorators import login_required
 from django.contrib.auth.views import LoginView, LogoutView
 from django.contrib.staticfiles.urls import staticfiles_urlpatterns
 from django.urls import path
-
-from basiclive.core.lims.conf import settings as lims_settings
-from basiclive.core.lims.views import ProxyView
 
 urlpatterns = [
     path('admin/', admin.site.urls, name='admin'),
@@ -45,6 +43,9 @@ if lims_settings.USE_SCHEDULE:
 
 if lims_settings.USE_PUBLICATIONS:
     urlpatterns += [path('publications/', include('basiclive.core.publications.urls'))]
+
+if lims_settings.USE_NOTEBOOKS:
+    urlpatterns += [path('notebooks/', include('basiclive.core.notebooks.urls'))]
 
 if settings.DEBUG:
     urlpatterns += staticfiles_urlpatterns()

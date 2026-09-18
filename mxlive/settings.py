@@ -55,6 +55,7 @@ INSTALLED_APPS = [
     'basiclive.core.schedule',
     'basiclive.core.crm',
     'basiclive.core.publications',
+    'basiclive.core.notebooks',
 
     "crispy_forms",
     "crispy_bootstrap5",
@@ -194,6 +195,7 @@ BASICLIVE_LIMS = {
     'APP_NAME': 'MxLIVE',
     'USE_SCHEDULE': True,
     'USE_PUBLICATIONS': True,
+    'USE_NOTEBOOKS': True,
     'USE_CRM': True,
     'USE_ACL': True,
 }
@@ -208,11 +210,14 @@ BASICLIVE_LIMS['APP_VERSION'] = mxlive.__version__
 if BASICLIVE_LIMS.get('USE_SCHEDULE') is False:
     INSTALLED_APPS.remove('basiclive.core.schedule')
 
-if BASICLIVE_LIMS.get('USE_USE_CRM') is False:
+if BASICLIVE_LIMS.get('USE_CRM') is False:
     INSTALLED_APPS.remove('basiclive.core.crm')
 
 if BASICLIVE_LIMS.get('USE_PUBLICATIONS') is False:
     INSTALLED_APPS.remove('basiclive.core.publications')
+
+if BASICLIVE_LIMS.get('USE_NOTEBOOKS') is False:
+    INSTALLED_APPS.remove('basiclive.core.notebooks')
 
 if AUTH_PROVIDERS:
     INSTALLED_APPS.extend(['allauth.socialaccount'])
