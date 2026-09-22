@@ -3,12 +3,17 @@
   @return red($hex), green($hex), blue($hex);
 }
 
-$bl-palette-0: #557055;
-$bl-palette-1: #9ABF9B;
-$bl-palette-2: #EBDBAC;
-$bl-palette-3: #CCB27C;
-$bl-palette-4: #705B36;
+//$bl-palette-0: #557055;
+//$bl-palette-1: #9ABF9B;
+//$bl-palette-2: #EBDBAC;
+//$bl-palette-3: #CCB27C;
+//$bl-palette-4: #705B36;
 
+$bl-palette-0: #5b2e48ff;
+$bl-palette-1: #ffb997ff;
+$bl-palette-2: #f67e7dff;
+$bl-palette-3: #6e8894ff;
+$bl-palette-4: #85baa1ff;
 
 :root, [data-bs-theme=light] {
   --bl-brand-accent: #{$bl-palette-0};
