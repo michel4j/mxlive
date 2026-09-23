@@ -15,9 +15,12 @@ class BootstrapIconBackend(BaseIconBackend):
         "add": "plus-lg",
         "remove": "dash-lg",
         "calendar": "calendar",
+        "check": "check-box",
         "edit": "pencil",
         "delete": "trash",
+        "move": "arrows-move",
         "view": "eye",
+        "list": "list-ul",
         "history": "stopwatch",
         "stats": "activity",
         "usage": "pie-chart",
@@ -57,6 +60,8 @@ class BootstrapIconBackend(BaseIconBackend):
         "arrow-right": "arrow-right",
         "arrow-up": "arrow-up",
         "arrow-down": "arrow-down",
+        "requests": "card-checklist",
+        "container": "box-seam",
     }
 
     def get_stylesheet_urls(self) -> List[str]:
