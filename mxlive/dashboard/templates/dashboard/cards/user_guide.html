@@ -77,16 +77,16 @@
                 <div class="tools-box w-100 ">
                     {% if guide.has_document %}
                         <a href="{{ guide.attachment.url }}" title="Download" download class="me-auto">
-                            {% show_icon icon='ti ti-md ti-clip' %}
+                            {% show_icon icon='edit' size='md' %}
                         </a>
                     {% endif %}
                     {% if request.user.is_superuser %}
                         <a href="#!" data-modal-url="{% url 'guide-edit' guide.pk %}" title="Edit" class="ms-auto"
                            style="padding-left: 0; padding-right: 0;">
-                            {% show_icon icon='ti ti-md ti-pencil' %}
+                            {% show_icon icon='edit' size='md' %}
                         </a>
                         <a href="#!" data-modal-url="{% url 'guide-delete' guide.pk %}" title="Delete">
-                            {% show_icon icon='ti ti-md ti-trash' %}
+                            {% show_icon icon='delete' size='md' %}
                         </a>
                     {% endif %}
                 </div>

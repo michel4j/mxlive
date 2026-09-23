@@ -37,33 +37,33 @@
 {% block page-tools %}
     {% if USE_ACL %}
         <a href="{% url 'access-list' %}">
-            {% show_icon label="Access" icon="ti ti-md ti-rss-alt" %}
+            {% show_icon label="Access" icon="connections" size='md' %}
         </a>
     {% endif %}
     <a href="{% url 'session-list' %}">
-        {% show_icon label="Sessions" icon="ti ti-md ti-calendar" %}
+        {% show_icon label="Sessions" icon="timer" size='md' %}
     </a>
     <a href="{% url 'user-list' %}">
-        {% show_icon label="Accounts" icon="ti ti-md ti-user" %}
+        {% show_icon label="Accounts" icon="profile" size='md' %}
     </a>
     {% if USE_SCHEDULE %}
         <a href="{% url 'schedule' %}">
-            {% show_icon label="Schedule" icon="ti ti-md ti-time" %}
+            {% show_icon label="Schedule" icon="calendar" size='md' %}
         </a>
     {% endif %}
     {% if USE_PUBLICATIONS %}
         <a href="{% url 'pub-entry-list' %}">
-            {% show_icon label="Publications" icon="ti ti-md ti-layout-list-post" %}
+            {% show_icon label="Publications" icon="journal" size='md' %}
         </a>
     {% endif %}
     {% if USE_CRM %}
         <a href="{% url 'supportrecord-list' %}" title="User Support">
-            {% show_icon label="Support" icon="ti ti-md ti-headphone-alt" %}
+            {% show_icon label="Support" icon="support" size='md' %}
         </a>
     {% endif %}
 
     <a href="#!" data-modal-url="{% url 'new-guide' %}" title="Create Guide">
-        {% show_icon label="Add Guide" icon="ti ti-md ti-agenda" %}
+        {% show_icon label="Add Guide" icon="help" size='md' %}
     </a>
 {% endblock %}
 
