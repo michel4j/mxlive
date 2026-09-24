@@ -2,6 +2,9 @@
     {% if card.title or title %}
     <div class="card-header text-center text-wide text-muted">
         <small>{{ card.title|default:title }}</small>
+        <span class="float-end">
+            {% block card_tools %}{% endblock %}
+        </span>
     </div>
     {% endif %}
     <div class="card-body {% block card_body_class %}{% endblock %}">

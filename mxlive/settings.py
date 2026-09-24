@@ -199,7 +199,8 @@ BASICLIVE_LIMS = {
     'USE_CRM': True,
     'USE_ACL': True,
 }
-#BASICLIVE_ICON_BACKEND = "mxlive.dashboard.icons.BootstrapIconBackend"
+# BASICLIVE_ICON_BACKEND = "mxlive.dashboard.icons.BootstrapIconBackend"
+BASICLIVE_ICON_BACKEND = "mxlive.dashboard.icons.TablerIconBackend"
 
 try:
     from local.settings import *

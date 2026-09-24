@@ -40,12 +40,6 @@
             {% show_icon label="Access" icon="connections" size='md' %}
         </a>
     {% endif %}
-    <a href="{% url 'session-list' %}">
-        {% show_icon label="Sessions" icon="history" size='md' %}
-    </a>
-    <a href="{% url 'user-list' %}">
-        {% show_icon label="Accounts" icon="profile" size='md' %}
-    </a>
     {% if USE_SCHEDULE %}
         <a href="{% url 'schedule' %}">
             {% show_icon label="Schedule" icon="calendar" size='md' %}
@@ -61,9 +55,14 @@
             {% show_icon label="Support" icon="support" size='md' %}
         </a>
     {% endif %}
-
-    <a href="#!" data-modal-url="{% url 'new-guide' %}" title="Create Guide">
-        {% show_icon label="Add Guide" icon="help" size='md' %}
+    {% if USE_NOTEBOOKS %}
+        <a href="{% url 'notebooks:notebook-list' %}" title="Electronic Notebooks">
+            {% show_icon label="Notebooks" icon="notebook" size='md' %}
+        </a>
+    {% endif %}
+    <div class="separator"></div>
+    <a href="{% url 'user-list' %}">
+        {% show_icon label="Accounts" icon="profile" size='md' %}
     </a>
 {% endblock %}
 

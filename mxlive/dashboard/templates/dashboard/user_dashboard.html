@@ -12,7 +12,18 @@
     <a href="#!" data-modal-url="{% url 'shipment-new' %}">
         {% show_icon label='New Shipment' icon='add' size="md" %}
     </a>
-    {% include "lims/tools-user.html" %}
+
+    <a  href="{% url 'session-list' %}">
+        {% show_icon label='Sessions' icon='history' size='md' %}
+    </a>
+    {% if USE_SCHEDULE %}
+        <a  href="{% url 'schedule' %}">
+            {% show_icon label="Schedule" icon="calendar" size='md' %}
+        </a>
+    {% endif %}
+    <a  href="{% url "project-profile" username=user.username %}">
+        {% show_icon label='My Profile' icon='stats' size='md' %}
+    </a>
 {% endblock %}
 
 {% block page-status-style %}callout{% endblock %}

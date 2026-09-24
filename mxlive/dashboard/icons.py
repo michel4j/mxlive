@@ -117,3 +117,85 @@ class BootstrapIconBackend(BaseIconBackend):
             }
         }
 
+
+class TablerIconBackend(BootstrapIconBackend):
+    """
+    Icon backend for Tabler Icons.
+    """
+    name = "tabler-icons"
+    base_class = "ti"
+    icon_prefix = "ti-"
+    stylesheet_urls = ("tabler-icons/css/tabler-icons-200.min.css",)
+    aliases = {
+        "add": "plus",
+        "remove": "minus",
+        "calendar": "calendar-week",
+        "check": "checkbox",
+        "edit": "pencil",
+        "delete": "trash",
+        "move": "arrows-move",
+        "view": "eye",
+        "list": "list",
+        "history": "stopwatch",
+        "stats": "activity",
+        "usage": "chart-pie",
+        "connections": "rss",
+        "feedback": "star",
+        "support": "headset",
+        "areas": "bookmarks",
+        "new-area": "bookmark-plus",
+        "request": "clipboard-heart",
+        "samples": "test-pipe",
+        "groups": "category",
+        "profile": "user-circle",
+        'journal': 'books',
+        "projects": "briefcase",
+        'text-entry': 'text-plus',
+        'file-entry': 'paperclip',
+        'image-entry': 'photo-plus',
+        'video-entry': 'brand-youtube',
+        'sketch-entry': 'sketching',
+        'data-entry': 'table-plus',
+        "light-theme": "brightness-up",
+        "dark-theme": "moon-stars",
+        "auto-theme": "brightness",
+        "data": "table-alias",
+        "reports": "report",
+        "receive": "shopping-cart-check",
+        "shipment": "truck-delivery",
+        "onsite": "map-pin",
+        "recall": "send-off",
+        "error": "exclamation-circle",
+        "comments": "message",
+        "requests": "list-details",
+        "container": "package",
+    }
+
+    def get_assets(self):
+        return {
+            "tabler-icons": {
+                "url": "https://cdn.jsdelivr.net/npm/@tabler/icons-webfont@3.48.0/dist/",
+                "css": [
+                    {
+                        "path": "tabler-icons-200.min.css",
+                        "sri": "sha256-KQbWBRFkUcTpt4+cKPVJoGM73BCOsof9+CbTl2eZFi4=",
+                    },
+                    {
+                        "path": "fonts/tabler-icons-200.woff",
+                        "sri": "sha256-3SY4XdJPpmzy36j+2h97VGzQwSF2LArv0WsaKjAETko=",
+                    },
+                    {
+                        "path": "fonts/tabler-icons-200.woff2",
+                        "sri": "sha256-XW/0uxZQIMHi4uNfV15brom0vX3qpLc92R3UMGtUHF0=",
+                    },
+                    {
+                        "path": "fonts/tabler-icons-200.ttf",
+                        "sri": "sha256-Z8xmF4oPnEJyHen+Prl8jGuqVrEHiG7YxJe/zJY1zCc=",
+                    },
+                    {
+                        "path": "fonts/tabler-icons-200.svg",
+                        "sri": "sha256-lUKqdWdV9vZOJ1PhIqqannZJynRmputZHn1YTUyJYIY=",
+                    },
+                ],
+            }
+        }
