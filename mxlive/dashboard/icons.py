@@ -34,6 +34,7 @@ class BootstrapIconBackend(BaseIconBackend):
         "groups": "collection",
         "profile": "person",
         'journal': 'journals',
+        "notebook": "journal-bookmark",
         "projects": "briefcase",
         'help': 'question-circle',
         'text-entry': 'body-text',
