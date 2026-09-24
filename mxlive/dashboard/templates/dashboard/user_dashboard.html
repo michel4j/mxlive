@@ -9,8 +9,8 @@
 {% endblock %}
 
 {% block page-tools %}
-    <a href="#!" data-modal-url="{% url 'shipment-new' %}">
-        {% show_icon label='New Shipment' icon='add' size="md" %}
+    <a href="#!" data-modal-url="{% url 'shipment-new' %}" title="Add Shipment">
+        {% show_icon label='Shipment' icon='add-shipment' size="md" %}
     </a>
 
     <a  href="{% url 'session-list' %}">

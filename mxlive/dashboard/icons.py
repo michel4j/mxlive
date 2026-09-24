@@ -67,31 +67,6 @@ class BootstrapIconBackend(BaseIconBackend):
     def get_stylesheet_urls(self) -> List[str]:
         return list(self.stylesheet_urls)
 
-    def resolve_icon_name(self, icon: str) -> str:
-        clean = icon.strip()
-        if not clean:
-            return ""
-
-        canonical = clean.split()[-1]
-        target = self.aliases.get(canonical, canonical)
-        return f"{self.icon_prefix}{target}"
-
-    def get_css_classes(
-        self,
-        icon: str,
-        size: Optional[str] = None,
-        extra_class: str = ""
-    ) -> str:
-        if not icon or not icon.strip():
-            return ""
-        parts = [self.base_class, self.resolve_icon_name(icon)]
-        size_cls = self.format_size_class(size)
-        if size_cls:
-            parts.append(size_cls)
-        if extra_class and extra_class.strip():
-            parts.append(extra_class.strip())
-        return " ".join(parts)
-
     def get_assets(self):
         return {
             "bootstrap-icons": {
@@ -128,6 +103,7 @@ class TablerIconBackend(BootstrapIconBackend):
     stylesheet_urls = ("tabler-icons/css/tabler-icons-200.min.css",)
     aliases = {
         "add": "plus",
+        "add-shipment": "cube-plus",
         "remove": "minus",
         "calendar": "calendar-week",
         "check": "checkbox",
