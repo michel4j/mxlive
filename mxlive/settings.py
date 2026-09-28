@@ -74,6 +74,7 @@ MIDDLEWARE = [
     'basiclive.core.acl.middleware.TrustedAccessMiddleware',
     'django.contrib.auth.middleware.AuthenticationMiddleware',
     'basiclive.core.api.middleware.APIAuthenticationMiddleware',
+    'basiclive.core.lims.middleware.ProjectContextMiddleware',
     'django.contrib.messages.middleware.MessageMiddleware',
     'django.middleware.clickjacking.XFrameOptionsMiddleware',
     "allauth.account.middleware.AccountMiddleware",
