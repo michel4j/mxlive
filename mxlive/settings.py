@@ -145,7 +145,7 @@ SECURE_CSP = {
 }
 
 AUTH_PROVIDERS = []
-AUTH_USER_MODEL = 'lims.Project'
+AUTH_USER_MODEL = 'lims.User'
 DEFAULT_AUTO_FIELD = 'django.db.models.BigAutoField'
 # Internationalization
 # https://docs.djangoproject.com/en/2.2/topics/i18n/

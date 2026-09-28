@@ -284,7 +284,7 @@ def get_staff_shipments():
         sample_count=Count('containers__samples', distinct=True),
         group_count=Count('groups', distinct=True),
         container_count=Count('containers', distinct=True),
-    ).order_by('status', 'project__kind__name', 'project__username', '-date_shipped').prefetch_related('project')
+    ).order_by('status', '-date_shipped').prefetch_related('project')
 
 
 def get_staff_adaptors():
@@ -292,7 +292,7 @@ def get_staff_adaptors():
     Retrieve adaptor containers owned by staff (superuser accounts).
     """
     return lims_models.Container.objects.filter(
-        project__is_superuser=True,
+        project__pi__is_superuser=True,
         kind__locations__accepts__isnull=False,
         beamlines__isnull=True,
         status__gt=lims_models.Container.STATES.DRAFT
