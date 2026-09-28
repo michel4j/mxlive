@@ -1,4 +1,4 @@
-from typing import Optional, List
+from typing import List
 
 from basiclive.core.lims.icons import BaseIconBackend
 
@@ -71,10 +71,9 @@ class BootstrapIconBackend(BaseIconBackend):
     def get_assets(self):
         return {
             "bootstrap-icons": {
-                "url": "https://cdn.jsdelivr.net/npm/bootstrap-icons@1.13.1/font/",
                 "css": [
                     {
-                        "path": "bootstrap-icons.min.css",
+                        "path": "https://cdn.jsdelivr.net/npm/bootstrap-icons@1.13.1/font/bootstrap-icons.min.css",
                         "sri": "sha256-pdY4ejLKO67E0CM2tbPtq1DJ3VGDVVdqAR6j3ZwdiE4=",
                     },
                     {
@@ -84,7 +83,6 @@ class BootstrapIconBackend(BaseIconBackend):
                     },
                     {
                         "path": "https://cdn.jsdelivr.net/npm/bootstrap-icons@1.13.1/font/fonts/bootstrap-icons.woff2",
-
                         "file": "fonts/bootstrap-icons.woff2",
                         "sri": "sha256-bHVxA2ShylYEJncW9tKJl7JjGf2weM8R4LQqtm/y6mE=",
 
@@ -151,26 +149,29 @@ class TablerIconBackend(BootstrapIconBackend):
     def get_assets(self):
         return {
             "tabler-icons": {
-                "url": "https://cdn.jsdelivr.net/npm/@tabler/icons-webfont@3.48.0/dist/",
                 "css": [
                     {
-                        "path": "tabler-icons-200.min.css",
+                        "path": "https://cdn.jsdelivr.net/npm/@tabler/icons-webfont@3.48.0/dist/tabler-icons-200.min.css",
                         "sri": "sha256-KQbWBRFkUcTpt4+cKPVJoGM73BCOsof9+CbTl2eZFi4=",
                     },
                     {
-                        "path": "fonts/tabler-icons-200.woff",
+                        "path": "https://cdn.jsdelivr.net/npm/@tabler/icons-webfont@3.48.0/dist/fonts/tabler-icons-200.woff",
+                        "file": "fonts/tabler-icons-200.woff",
                         "sri": "sha256-3SY4XdJPpmzy36j+2h97VGzQwSF2LArv0WsaKjAETko=",
                     },
                     {
-                        "path": "fonts/tabler-icons-200.woff2",
+                        "path": "https://cdn.jsdelivr.net/npm/@tabler/icons-webfont@3.48.0/dist/fonts/tabler-icons-200.woff2",
+                        "file": "fonts/tabler-icons-200.woff2",
                         "sri": "sha256-XW/0uxZQIMHi4uNfV15brom0vX3qpLc92R3UMGtUHF0=",
                     },
                     {
-                        "path": "fonts/tabler-icons-200.ttf",
+                        "path": "https://cdn.jsdelivr.net/npm/@tabler/icons-webfont@3.48.0/dist/fonts/tabler-icons-200.ttf",
+                        "file": "fonts/tabler-icons-200.ttf",
                         "sri": "sha256-Z8xmF4oPnEJyHen+Prl8jGuqVrEHiG7YxJe/zJY1zCc=",
                     },
                     {
-                        "path": "fonts/tabler-icons-200.svg",
+                        "path": "https://cdn.jsdelivr.net/npm/@tabler/icons-webfont@3.48.0/dist/fonts/tabler-icons-200.svg",
+                        "file": "fonts/tabler-icons-200.svg",
                         "sri": "sha256-lUKqdWdV9vZOJ1PhIqqannZJynRmputZHn1YTUyJYIY=",
                     },
                 ],
