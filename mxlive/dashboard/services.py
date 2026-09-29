@@ -1,10 +1,11 @@
 import calendar
 from datetime import datetime, date, time, timedelta
+
 from django.db.models import Q, Count, Max, Case, When, Value, BooleanField
 from django.utils import timezone
 
-from basiclive.core.lims.conf import settings as lims_cfg
 from basiclive.core.lims import models as lims_models
+from basiclive.core.lims.conf import settings as lims_cfg
 
 
 def get_user_shipments(user):
@@ -18,9 +19,12 @@ def get_user_shipments(user):
         return []
     now = timezone.now()
     one_year_ago = now - timedelta(days=365)
-    return user.shipments.filter(
-        Q(status__lt=lims_models.Shipment.STATES.RETURNED)
-        | Q(status=lims_models.Shipment.STATES.RETURNED, date_returned__gt=one_year_ago)
+    return lims_models.Shipment.objects.filter(
+        Q(project__memberships__user=user) &
+        (
+            Q(status__lt=lims_models.Shipment.STATES.RETURNED) |
+            Q(status=lims_models.Shipment.STATES.RETURNED, date_returned__gt=one_year_ago)
+        )
     ).annotate(
         data_count=Count('containers__samples__datasets', distinct=True),
         report_count=Count('containers__samples__datasets__reports', distinct=True),
@@ -45,16 +49,15 @@ def get_user_beamtimes(user):
         return []
 
     now = timezone.now()
-    return user.beamtime.filter(
-        end__gte=now,
-        cancelled=False
+    return Beamtime.objects.filter(
+        project__memberships__user=user, end__gte=now, cancelled=False
     ).with_duration().annotate(
         current=Case(
             When(start__lte=now, then=Value(True)),
             default=Value(False),
             output_field=BooleanField()
         )
-    ).order_by('-current', 'start')
+    ).distinct().order_by('-current', 'start')
 
 
 def get_user_beamtime_calendar(user, reference_date=None, num_months=3, beamtimes=None):
@@ -262,7 +265,8 @@ def get_user_sessions(user, limit: int = 7):
         return []
     now = timezone.now()
     one_year_ago = now - timedelta(days=365)
-    return user.sessions.filter(
+    return lims_models.Session.objects.filter(
+        project__memberships__user=user,
         created__gt=one_year_ago
     ).annotate(
         data_count=Count('datasets', distinct=True),
