@@ -49,6 +49,7 @@ INSTALLED_APPS = [
 
     'memoize',
     'itemlist',
+    'reportcraft',
     'basiclive.core.lims',
     'basiclive.core.api',
     'basiclive.core.acl',
@@ -202,6 +203,33 @@ BASICLIVE_LIMS = {
 }
 #BASICLIVE_ICON_BACKEND = "mxlive.dashboard.icons.BootstrapIconBackend"
 BASICLIVE_ICON_BACKEND = "mxlive.dashboard.icons.TablerIconBackend"
+
+REPORTCRAFT_APPS = ['lims', 'schedule', 'crm', 'publications', 'acl', 'notebooks']
+REPORTCRAFT_MIXINS = {
+    'VIEW': ['basiclive.utils.mixins.StaffRequiredMixin'],
+    'EDIT': ['basiclive.utils.mixins.AdminRequiredMixin'],
+}
+REPORTCRAFT_FUNCTIONS = [
+    'basiclive.utils.functions.String',
+    'basiclive.utils.functions.JoinArray',
+    'basiclive.utils.functions.ArrayLength',
+    'reportcraft.functions.postgres.Join',
+    'django.contrib.postgres.aggregates.ArrayAgg',
+    'django.contrib.postgres.aggregates.JSONBAgg',
+    'basiclive.utils.functions.ArrayItems',
+    'basiclive.utils.functions.JSONAvg',
+    'basiclive.utils.functions.AgeYears',
+    'basiclive.utils.functions.AgeMonths',
+    'basiclive.utils.functions.YearMonth',
+    'basiclive.utils.functions.Quarter',
+    'basiclive.utils.functions.RootValue',
+    'basiclive.utils.functions.SubMin',
+    'basiclive.utils.functions.SubMax',
+    'basiclive.utils.functions.SubCount',
+    'basiclive.utils.functions.SubAvg',
+    'basiclive.utils.functions.SubSum',
+    'basiclive.utils.functions.Shifts',
+]
 
 try:
     from local.settings import *

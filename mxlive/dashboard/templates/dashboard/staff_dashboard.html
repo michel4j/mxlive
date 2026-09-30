@@ -1,10 +1,10 @@
-{% extends "lims/base.html" %}
+{% extends "base.html" %}
 {% load static %}
 {% load bl_guides %}
 {% load bl_icons %}
 {% load dashboard_tags %}
 
-{% block extra_css %}
+{% block page-styles %}
     <style>
         {% for kind in access_types %}
             .{{kind.name}} {
@@ -23,7 +23,7 @@
     </style>
 {% endblock %}
 
-{% block pre_js %}
+{% block pre-scripts %}
     <script src="{% static 'd3/js/d3.min.js' %}"></script>
     <script src="{% static 'd3/js/d3-selection-multi.v1.min.js' %}"></script>
     <script type="text/javascript" src="{% static 'lims/js/basiclive-layouts.min.js' %}"></script>

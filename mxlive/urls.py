@@ -15,8 +15,6 @@ Including another URLconf
 """
 
 
-from basiclive.core.lims.conf import settings as lims_settings
-from basiclive.core.lims.views import ProxyView
 from django.conf import settings
 from django.conf.urls import include
 from django.conf.urls.static import static
@@ -25,11 +23,15 @@ from django.contrib.auth.views import LoginView, LogoutView
 from django.contrib.staticfiles.urls import staticfiles_urlpatterns
 from django.urls import path
 
+from basiclive.core.lims.conf import settings as lims_settings
+from basiclive.core.lims.views import ProxyView
+
 urlpatterns = [
     path('admin/', admin.site.urls, name='admin'),
     path('access/', include('basiclive.core.acl.urls')),
     path('users/',  include('basiclive.core.lims.urls')),
     path('crm/', include('basiclive.core.crm.urls')),
+    path('stats/', include('reportcraft.urls')),
     path('files/<str:section>/<path:path>', ProxyView.as_view(), name='files-proxy'),
     # path('accounts/', include('allauth.urls')),
     path('accounts/login/',  LoginView.as_view(template_name='lims/login.html'), name="login"),
