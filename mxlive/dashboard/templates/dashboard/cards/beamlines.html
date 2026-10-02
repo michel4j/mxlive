@@ -1,11 +1,12 @@
 {% extends "dashboard/cards/base_card.html" %}
-
 {% block card_body_class %}p-0{% endblock %}
 {% block card_content %}
     <div class="list-group list-group-flush list-group-hover">
     {% for bl in beamlines %}
         {% with bl.active_automounter as automounter %}
-            <a href="{% url 'beamline-detail' pk=bl.pk %}" class="text-center list-group-item p-2">
+            <a href="{% url 'beamline-detail' pk=bl.pk %}"
+               class="text-center list-group-item p-2 {% if bl.simulated %}text-bg-cat-2{% endif %}"
+            >
                 <div id="layout-{{ automounter.pk }}" class="layout-lg mb-2">
                     <h5 class="text-condensed my-0">
                         <strong class="text-condensed fs-5">{{ bl.acronym }}</strong>

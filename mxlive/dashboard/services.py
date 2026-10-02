@@ -305,9 +305,9 @@ def get_staff_adaptors():
 
 def get_staff_beamlines():
     """
-    Retrieve all beamlines ordered by name.
+    Retrieve all active beamlines ordered by simulated status and name.
     """
-    return lims_models.Beamline.objects.all().order_by('name')
+    return lims_models.Beamline.objects.filter(active=True).order_by('simulated', 'name')
 
 
 def get_staff_active_connections():
@@ -343,7 +343,7 @@ def get_staff_active_connections():
     connections = Access.objects.none() if (use_acl and Access) else lims_models.Project.objects.none()
     sessions = lims_models.Session.objects.none()
 
-    # 1. Scheduled beamtimes
+    # Scheduled beamtimes
     if use_schedule and Beamtime:
         for bt in Beamtime.objects.filter(start__lte=now, end__gte=now).with_duration():
             bt_sessions = lims_models.Session.objects.filter(
@@ -370,7 +370,7 @@ def get_staff_active_connections():
                 'connections': bt_conns
             })
 
-    # 2. Active sessions not already counted
+    # Active sessions not already counted
     for session in active_sessions.exclude(pk__in=[s.pk for s in sessions]):
         if use_acl and Access:
             ss_conns = active_access.filter(
@@ -388,7 +388,7 @@ def get_staff_active_connections():
             'connections': ss_conns
         })
 
-    # 3. Users remotely connected without schedule or session
+    # Users remotely connected without schedule or session
     if use_acl and Access:
         for user_pk in active_access.exclude(pk__in=[c.pk for c in connections]).values_list('user', flat=True).distinct():
             user_conns = active_access.exclude(pk__in=[c.pk for c in connections]).filter(user__pk=user_pk)
