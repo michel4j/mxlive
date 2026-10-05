@@ -235,6 +235,7 @@ REPORTCRAFT_FUNCTIONS = [
     'basiclive.utils.functions.SubAvg',
     'basiclive.utils.functions.SubSum',
     'basiclive.utils.functions.Shifts',
+    'basiclive.utils.functions.BoolMap',
 ]
 
 try:
