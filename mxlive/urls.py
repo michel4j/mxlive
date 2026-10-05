@@ -29,8 +29,8 @@ from basiclive.core.lims.views import ProxyView
 urlpatterns = [
     path('admin/', admin.site.urls, name='admin'),
     path('access/', include('basiclive.core.acl.urls')),
-    path('users/',  include('basiclive.core.lims.urls')),
-    path('crm/', include('basiclive.core.crm.urls')),
+    path('lims/',  include('basiclive.core.lims.urls')),
+    path('support/', include('basiclive.core.crm.urls')),
     path('reporting/', include('reportcraft.urls')),
     path('files/<str:section>/<path:path>', ProxyView.as_view(), name='files-proxy'),
     # path('accounts/', include('allauth.urls')),
