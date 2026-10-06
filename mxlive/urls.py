@@ -24,7 +24,7 @@ from django.contrib.staticfiles.urls import staticfiles_urlpatterns
 from django.urls import path
 
 from basiclive.core.lims.conf import settings as lims_settings
-from basiclive.core.lims.views import ProxyView
+from basiclive.core.lims.views import ProxyView, custom_403_view, custom_404_view, custom_500_view
 
 urlpatterns = [
     path('admin/', admin.site.urls, name='admin'),
@@ -52,4 +52,8 @@ if lims_settings.USE_NOTEBOOKS:
 if settings.DEBUG:
     urlpatterns += staticfiles_urlpatterns()
     urlpatterns += static(settings.MEDIA_URL, document_root=settings.MEDIA_ROOT)
-
+    urlpatterns += [
+        path('403/', custom_403_view, kwargs={'exception': Exception("Permission Denied")}),
+        path('404/', custom_404_view, kwargs={'exception': Exception("Page not Found")}),
+        path('500/', custom_500_view),
+    ]
