@@ -3,24 +3,24 @@
   @return red($hex), green($hex), blue($hex);
 }
 
-//$bl-palette-0: #557055;
-//$bl-palette-1: #9ABF9B;
-//$bl-palette-2: #EBDBAC;
-//$bl-palette-3: #CCB27C;
-//$bl-palette-4: #705B36;
+$staff-palette-0: #557055;
+$staff-palette-1: #9ABF9B;
+$staff-palette-2: #EBDBAC;
+$staff-palette-3: #CCB27C;
+$staff-palette-4: #705B36;
 
-$bl-palette-0: #5b2e48ff;
-$bl-palette-1: #ffb997ff;
-$bl-palette-2: #f67e7dff;
-$bl-palette-3: #6e8894ff;
-$bl-palette-4: #85baa1ff;
+$user-palette-0: #5b2e48ff;
+$user-palette-1: #ffb997ff;
+$user-palette-2: #f67e7dff;
+$user-palette-3: #6e8894ff;
+$user-palette-4: #85baa1ff;
 
 :root, [data-bs-theme=light] {
-  --bl-brand-accent: #{$bl-palette-0};
-  --bl-brand-secondary: #{$bl-palette-1};
-  --bl-brand-neutral: #{$bl-palette-2};
-  --bs-primary: #{$bl-palette-0};
-  --bs-primary-rgb: #{hex-to-rgb($bl-palette-0)};
+  --bl-brand-accent: #{$user-palette-0};
+  --bl-brand-secondary: #{$user-palette-1};
+  --bl-brand-neutral: #{$user-palette-2};
+  --bs-primary: #{$user-palette-0};
+  --bs-primary-rgb: #{hex-to-rgb($user-palette-0)};
   --bs-border-radius: 0.375rem;
   --bs-border-radius-sm: 0.25rem;
   --bs-border-radius-lg: 0.5rem;
@@ -35,8 +35,16 @@ $bl-palette-4: #85baa1ff;
 [data-bs-theme=dark] {
   color-scheme: dark;
   --bl-shaded-bg: rgba(255, 255, 255, 0.05);
-  --bs-link-color: #{$bl-palette-1};
-  --bs-link-color-rgb: #{hex-to-rgb($bl-palette-1)};
+  --bs-link-color: #{$user-palette-1};
+  --bs-link-color-rgb: #{hex-to-rgb($user-palette-1)};
+}
+
+[data-bl-accent=staff] {
+  --bl-brand-accent: #{$staff-palette-0};
+  --bl-brand-secondary: #{$staff-palette-1};
+  --bl-brand-neutral: #{$staff-palette-2};
+  --bs-primary: #{$staff-palette-0};
+  --bs-primary-rgb: #{hex-to-rgb($staff-palette-0)};
 }
 
 .modal-header {
@@ -109,18 +117,6 @@ $rgb-category-colors: (
   (9, 186, 176, 171), //#bab0ab
 );
 
-//@each $key, $hue, $saturation, $lightness in $hsl-category-colors {
-//  .text-bg-cat-#{$key} {
-//    --bl-cat-color: hsla(#{$hue}, #{$saturation}, #{$lightness}, 1);
-//    --bl-cat-bg: hsla(#{$hue}, #{$saturation}, #{$lightness}, 0.25);
-//    --bs-card-bg: var(--bl-cat-bg);
-//    color: var(--bl-cat-color);
-//    background-color: var(--bl-cat-bg);
-//    &.b-0 {
-//      --bs-card-border-color: transparent;
-//    }
-//  }
-//}
 @each $key, $r, $g, $b in $rgb-category-colors {
   .text-bg-cat-#{$key} {
     --bl-cat-color: rgba(#{$r}, #{$g}, #{$b}, 1);
