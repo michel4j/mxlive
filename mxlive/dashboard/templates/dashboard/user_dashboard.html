@@ -22,7 +22,10 @@
         </a>
     {% endif %}
     <a  href="{% url "project-profile" name=user.username %}">
-        {% show_icon label='My Profile' icon='stats' size='md' %}
+        {% show_icon label='Project' icon='briefcase' size='md' %}
+    </a>
+    <a  href="{% url "user-detail" username=user.username %}">
+        {% show_icon label='Profile' icon='profile' size='md' %}
     </a>
 {% endblock %}
 
