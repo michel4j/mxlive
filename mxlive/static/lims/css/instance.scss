@@ -192,13 +192,13 @@ $rgb-category-colors: (
 	}
 }
 .legend-dot {
-	width: 8px;
-	height: 8px;
+	width: 1em;
+	height: 1em;
 	border-radius: 50%;
 	display: inline-block;
 }
 .legend-label {
-	font-size: 0.68rem;
+	font-size: 0.7rem;
 }
 .beamtime-popover {
 	max-width: 260px;
