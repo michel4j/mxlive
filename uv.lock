@@ -83,7 +83,7 @@ requires-dist = [
     { name = "django-memoize" },
     { name = "django-model-utils" },
     { name = "django-python3-ldap", marker = "extra == 'ldap'" },
-    { name = "django-reportcraft", specifier = ">=2026.9.5,<2027.0.0" },
+    { name = "django-reportcraft", specifier = ">=2026.9.9,<2027.0.0" },
     { name = "djangorestframework" },
     { name = "djangorestframework-simplejwt" },
     { name = "fastjsonschema" },
