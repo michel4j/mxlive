@@ -31,7 +31,6 @@ urlpatterns = [
     path('access/', include('basiclive.core.acl.urls')),
     path('lims/',  include('basiclive.core.lims.urls')),
     path('support/', include('basiclive.core.crm.urls')),
-    path('reporting/', include('reportcraft.urls')),
     path('files/<str:section>/<path:path>', ProxyView.as_view(), name='files-proxy'),
     # path('accounts/', include('allauth.urls')),
     path('accounts/login/',  LoginView.as_view(template_name='lims/login.html'), name="login"),

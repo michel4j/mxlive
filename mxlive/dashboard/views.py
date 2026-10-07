@@ -1,6 +1,9 @@
 from django.contrib.auth.mixins import LoginRequiredMixin, UserPassesTestMixin
 from django.views.generic import TemplateView, View
+from reportcraft.views import ReportIndexView
+
 from basiclive.core.lims.conf import settings as lims_cfg
+from basiclive.utils.mixins import AdminRequiredMixin
 from .registry import card_registry
 
 
@@ -67,3 +70,10 @@ class DashboardIndexView(LoginRequiredMixin, View):
         if request.user.is_superuser:
             return StaffDashboardView.as_view()(request, *args, **kwargs)
         return UserDashboardView.as_view()(request, *args, **kwargs)
+
+
+class ReportIndex(AdminRequiredMixin, ReportIndexView):
+    """
+    View for the reporting index page.
+    """
+    template_name = 'dashboard/report_index.html'

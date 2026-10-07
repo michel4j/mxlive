@@ -1,0 +1,31 @@
+{% extends "base.html" %}
+{% load static bl_icons reportcraft %}
+
+
+{% block page-pre-title %}List of{% endblock %}
+{% block page-title %}{{ section|default:"" }} Reports{% endblock %}
+{% block page-tools %}
+    {% if user.is_superuser %}
+    <a href="{% url 'report-editor-root' %}">
+        {% show_icon label="Report Builder" icon="tools" size='md' %}
+    </a>
+    {% endif %}
+
+{% endblock %}
+{% block page-content %}
+    {% include "itemlist/filters.html" %}
+    <ul class="list-unstyled">
+        {% for report in object_list %}
+            <li class="list-group-item d-flex flex-row align-items-center py-1 ps-0 border-bottom border-bottom-1">
+                <div class="text-muted me-3">{% show_icon icon='reports' size="md" %}</div>
+                <div class="d-flex flex-column align-items-start">
+                    <a href="{% report_url report %}">{{ report.title }}</a>
+                    {% if report.description %}
+                        <small class="text-muted text-md">{{ report.description }}</small>
+                    {% endif %}
+                </div>
+            </li>
+        {% endfor %}
+    </ul>
+{% include "itemlist/pagination.html" %}
+{% endblock %}
