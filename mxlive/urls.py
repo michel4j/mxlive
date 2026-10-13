@@ -26,6 +26,9 @@ from django.urls import path
 from basiclive.core.lims.conf import settings as lims_settings
 from basiclive.core.lims.views import ProxyView, custom_403_view, custom_404_view, custom_500_view
 
+admin.site.site_header = f"{lims_settings.APP_NAME} Backend"
+admin.site.index_title = f"{lims_settings.APP_NAME} Administration"
+
 urlpatterns = [
     path('admin/', admin.site.urls, name='admin'),
     path('access/', include('basiclive.core.acl.urls')),

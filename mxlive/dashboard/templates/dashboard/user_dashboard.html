@@ -21,7 +21,7 @@
             {% show_icon label="Schedule" icon="calendar" size='md' %}
         </a>
     {% endif %}
-    <a  href="{% url "project-profile" name=user.username %}">
+    <a  href="{% url "project-profile" name=user.default_project.name %}">
         {% show_icon label='Project' icon='briefcase' size='md' %}
     </a>
     <a  href="{% url "user-detail" username=user.username %}">
