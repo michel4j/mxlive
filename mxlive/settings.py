@@ -44,24 +44,6 @@ INSTALLED_APPS = [
     'django.contrib.staticfiles',
     'django.contrib.humanize',
 
-    'allauth',
-    'allauth.account',
-
-    'memoize',
-    'itemlist',
-    'reportcraft',
-    'basiclive.core.lims',
-    'basiclive.core.api',
-    'basiclive.core.acl',
-    'basiclive.core.schedule',
-    'basiclive.core.crm',
-    'basiclive.core.publications',
-    'basiclive.core.notebooks',
-
-    "crispy_forms",
-    "crispy_bootstrap5",
-    "crisp_modals",
-
     'mxlive.dashboard',
 ]
 
@@ -73,13 +55,9 @@ MIDDLEWARE = [
     'django.contrib.sessions.middleware.SessionMiddleware',
     'django.middleware.common.CommonMiddleware',
     'django.middleware.csrf.CsrfViewMiddleware',
-    'basiclive.core.acl.middleware.TrustedAccessMiddleware',
     'django.contrib.auth.middleware.AuthenticationMiddleware',
-    'basiclive.core.api.middleware.APIAuthenticationMiddleware',
-    'basiclive.core.lims.middleware.ProjectContextMiddleware',
     'django.contrib.messages.middleware.MessageMiddleware',
     'django.middleware.clickjacking.XFrameOptionsMiddleware',
-    "allauth.account.middleware.AccountMiddleware",
 ]
 
 ROOT_URLCONF = 'mxlive.urls'
@@ -134,26 +112,9 @@ AUTH_PASSWORD_VALIDATORS = [
 
 AUTHENTICATION_BACKENDS = [
     'django.contrib.auth.backends.ModelBackend',
-    'allauth.account.auth_backends.AuthenticationBackend',
 ]
 
 SECURE_REFERRER_POLICY = "strict-origin-when-cross-origin"
-SECURE_CSP = {
-    "default-src": [CSP.SELF, "https://cdn.jsdelivr.net", "https://cdnjs.cloudflare.com"],
-    "img-src": ["data:", CSP.SELF, "https://cdn.rcsb.org"],
-    "style-src": [
-        CSP.SELF, CSP.UNSAFE_INLINE, "https://fonts.googleapis.com",
-        "https://cdn.jsdelivr.net", "https://cdnjs.cloudflare.com"
-    ],
-    "font-src": [CSP.SELF, "https://fonts.gstatic.com"],
-    "script-src": [
-        CSP.UNSAFE_INLINE, CSP.UNSAFE_EVAL, CSP.SELF, "https://cdn.jsdelivr.net", "https://cdnjs.cloudflare.com"
-    ],
-    "frame-src": [CSP.NONE],
-}
-
-AUTH_PROVIDERS = []
-AUTH_USER_MODEL = 'lims.User'
 DEFAULT_AUTO_FIELD = 'django.db.models.BigAutoField'
 # Internationalization
 # https://docs.djangoproject.com/en/2.2/topics/i18n/
@@ -167,18 +128,10 @@ USE_TZ = True
 # Static files (CSS, JavaScript, Images)
 STATIC_URL = '/static/'
 STATIC_ROOT = BASE_DIR / 'static'
-BASICLIVE_ASSETS_ROOT = PROJECT_DIR / "static" / "assets"     # Location of 3rd party asset files
-STATICFILES_DIRS = [
-    PROJECT_DIR / "static",
-    BASICLIVE_ASSETS_ROOT,
-]
-
 MEDIA_URL = '/media/'
-MEDIA_ROOT = BASE_DIR / 'local' / 'media'
+
 LOGIN_REDIRECT_URL = '/'
 LOGOUT_REDIRECT_URL = '/'
-CRISPY_ALLOWED_TEMPLATE_PACKS = "bootstrap5"
-CRISPY_TEMPLATE_PACK = "bootstrap5"
 
 # LDAP Server Settings
 LDAP_BASE_DN = 'dc=demo1,dc=freeipa,dc=org'
@@ -201,69 +154,12 @@ LDAP_AUTH_USE_TLS = True
 
 BASICLIVE_LIMS = {
     'APP_NAME': 'MxLIVE',
-    'USE_SCHEDULE': True,
-    'USE_PUBLICATIONS': True,
-    'USE_NOTEBOOKS': True,
-    'USE_CRM': True,
-    'USE_ACL': True,
 }
-#BASICLIVE_ICON_BACKEND = "mxlive.dashboard.icons.BootstrapIconBackend"
-BASICLIVE_ICON_BACKEND = "mxlive.dashboard.icons.TablerIconBackend"
 
-REPORTCRAFT_APPS = ['lims', 'schedule', 'crm', 'publications', 'acl', 'notebooks']
-REPORTCRAFT_MIXINS = {
-    'VIEW': ['basiclive.utils.mixins.StaffRequiredMixin'],
-    'EDIT': ['basiclive.utils.mixins.AdminRequiredMixin'],
-}
-REPORTCRAFT_FUNCTIONS = [
-    'basiclive.utils.functions.String',
-    'basiclive.utils.functions.JoinArray',
-    'basiclive.utils.functions.ArrayLength',
-    'reportcraft.functions.postgres.Join',
-    'django.contrib.postgres.aggregates.ArrayAgg',
-    'django.contrib.postgres.aggregates.JSONBAgg',
-    'basiclive.utils.functions.ArrayItems',
-    'basiclive.utils.functions.JSONAvg',
-    'basiclive.utils.functions.AgeYears',
-    'basiclive.utils.functions.AgeMonths',
-    'basiclive.utils.functions.YearMonth',
-    'basiclive.utils.functions.Quarter',
-    'basiclive.utils.functions.RootValue',
-    'basiclive.utils.functions.SubMin',
-    'basiclive.utils.functions.SubMax',
-    'basiclive.utils.functions.SubCount',
-    'basiclive.utils.functions.SubAvg',
-    'basiclive.utils.functions.SubSum',
-    'basiclive.utils.functions.Shifts',
-    'basiclive.utils.functions.BoolMap',
-    'basiclive.utils.functions.TruncateWords',
-]
 
 try:
-    from local.settings import *
+    from basiclive.utils import configure
 except ImportError as err:
-    print(f'Error importing local settings: {err}')
-
-BASICLIVE_LIMS['APP_VERSION'] = mxlive.__version__
-
-if BASICLIVE_LIMS.get('USE_SCHEDULE') is False:
-    INSTALLED_APPS.remove('basiclive.core.schedule')
-
-if BASICLIVE_LIMS.get('USE_CRM') is False:
-    INSTALLED_APPS.remove('basiclive.core.crm')
-
-if BASICLIVE_LIMS.get('USE_PUBLICATIONS') is False:
-    INSTALLED_APPS.remove('basiclive.core.publications')
-
-if BASICLIVE_LIMS.get('USE_NOTEBOOKS') is False:
-    INSTALLED_APPS.remove('basiclive.core.notebooks')
-
-if AUTH_PROVIDERS:
-    INSTALLED_APPS.extend(['allauth.socialaccount'])
-    for provider in AUTH_PROVIDERS:
-        if provider == 'ldap':
-            AUTHENTICATION_BACKENDS[0] = 'django_python3_ldap.auth.LDAPBackend'
-        elif provider == 'cas':
-            AUTHENTICATION_BACKENDS[0] = 'django_cas_ng.backends.CASBackend'
-        else:
-            INSTALLED_APPS.append(f'allauth.socialaccount.providers.{provider}')
+    print(f'Failed to configure BasicLive: {err}')
+else:
+    configure(globals())
