@@ -1,3 +1,4 @@
+from django.contrib import messages
 from django.contrib.auth.mixins import LoginRequiredMixin, UserPassesTestMixin
 from django.views.generic import TemplateView, View
 from reportcraft.views import ReportIndexView
@@ -26,7 +27,9 @@ class BaseDashboardView(LoginRequiredMixin, TemplateView):
             'right_cards': [c for c in cards if c.column == 'right'],
             'full_cards': [c for c in cards if c.column == 'full'],
         })
-
+        messages.add_message(self.request, messages.WARNING, "Hello world.")
+        messages.add_message(self.request, messages.INFO, "Welcome to the MXLive Dashboard! Explore the cards to access various features and information.")
+        messages.add_message(self.request, messages.SUCCESS, "You have successfully logged in.")
         if lims_cfg.USE_SCHEDULE:
             try:
                 from basiclive.core.schedule.models import AccessType
