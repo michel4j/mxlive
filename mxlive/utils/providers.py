@@ -76,7 +76,7 @@ class USOProjectProvider(BaseProjectProvider):
         if 'pi' in roles:
             return ProjectMembership.Role.PI
         elif 'delegate' in roles:
-            return ProjectMembership.Role.CO_INVESTIGATOR
+            return ProjectMembership.Role.DELEGATE
         else:
             return ProjectMembership.Role.MEMBER
 
@@ -105,7 +105,7 @@ class USOProjectProvider(BaseProjectProvider):
             phone="",
         )
 
-    def _parse_project(self, raw: dict[str, Any]) -> ExternalProjectData | None:
+    def _parse_project(self, raw: dict[str, Any]) -> ExternalProjectData:
         project = NestedDict(raw)
         members = [
             self._parse_member(m)
@@ -123,7 +123,7 @@ class USOProjectProvider(BaseProjectProvider):
             code=str(project.code).strip(),
             title=str(project.title).strip(),
             start_date=parse_date_value(project.start_date),
-            end_date=parse_date_value(project.start_date),
+            end_date=parse_date_value(project.end_date),
             kind=str(project.proposal_type).strip(),
             alias=None,
             contact_person=f"{contact.first_name} {contact.last_name}",
@@ -147,16 +147,20 @@ class USOProjectProvider(BaseProjectProvider):
         params = {
             'search': self.search
         }
-        projects: list[ExternalProjectData] = []
+        raw_projects: dict[str, dict] = {}
         for cycle_id in [cur_cycle, cur_cycle + 1]:
             params['cycle'] = str(cycle_id)
-            records = [alloc['project'] for alloc in self._fetch(self.ALLOCATIONS, **params)]
-            for item in records:
-                if not isinstance(item, dict):
-                    continue
-                parsed = self._parse_project(item)
-                if parsed:
-                    projects.append(parsed)
+            raw_projects.update({
+                alloc['project']['code']: alloc['project']
+                for alloc in self._fetch(self.ALLOCATIONS, **params)
+            })
+
+        projects: list[ExternalProjectData] = [
+            self._parse_project(item)
+            for item in raw_projects.values()
+            if isinstance(item, dict)
+        ]
+
         return projects
 
     def fetch_institution(self, name: str) -> dict | None:
