@@ -17,12 +17,6 @@ from basiclive.utils.misc import parse_date_value, NestedDict
 
 logger = logging.getLogger(__name__)
 
-_ROLE_RANK = {
-    ProjectMembership.Role.MEMBER: 1,
-    ProjectMembership.Role.CO_INVESTIGATOR: 2,
-    ProjectMembership.Role.PI: 3,
-}
-
 
 class USOProjectProvider(BaseProjectProvider):
     ALLOCATIONS = '/v2/projects/allocations/'
