@@ -88,6 +88,15 @@ class USOProjectProvider(BaseProjectProvider):
 
         return team[0]
 
+    @staticmethod
+    def _get_kind(raw_kind: str) -> str:
+        return {
+            'general user access': 'Academic',
+            'industry services access': 'Industry',
+            'beamline maintenance and development': 'Commissioning',
+            'rapid access': 'Academic'
+        }.get(raw_kind.lower(), 'Academic')
+
     def _parse_member(self, raw: dict[str, Any]) -> ExternalMemberData:
         member = NestedDict(raw)
         return ExternalMemberData(
@@ -118,7 +127,7 @@ class USOProjectProvider(BaseProjectProvider):
             title=str(project.title).strip(),
             start_date=parse_date_value(project.start_date),
             end_date=parse_date_value(project.end_date),
-            kind=str(project.proposal_type).strip(),
+            kind=self._get_kind(project.proposal_type).strip(),
             alias=None,
             contact_person=f"{contact.first_name} {contact.last_name}",
             contact_email=contact.email,
