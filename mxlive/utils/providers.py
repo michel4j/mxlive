@@ -1,37 +1,19 @@
 from __future__ import annotations
 
-import itertools
 import logging
 import weakref
-from dataclasses import dataclass, field
-from datetime import date, datetime
-from typing import Any, Iterable
+from typing import Any
 
 import httpx2
-from django.core.cache import cache
-from django.db import transaction
-from django.db.models import Q
-from django.utils.dateparse import parse_date, parse_datetime
-from django.utils.module_loading import import_string
-
+from basiclive.core.lims.models import (
+    ProjectMembership,
+)
 from basiclive.core.lims.providers import (
     BaseProjectProvider,
     ExternalMemberData,
-    ExternalProjectData,
-    ExternalUserData
-)
-
-from basiclive.core.lims.conf import settings as lims_settings
-from basiclive.core.lims.models import (
-    Country,
-    Project,
-    ProjectMembership,
-    ProjectType,
-    Region,
-    User,
+    ExternalProjectData
 )
 from basiclive.utils.misc import parse_date_value, NestedDict
-
 
 logger = logging.getLogger(__name__)
 
@@ -138,7 +120,8 @@ class USOProjectProvider(BaseProjectProvider):
 
         return ExternalProjectData(
             source_id=str(project.code).strip(),
-            name=str(project.display_name).strip(),
+            code=str(project.code).strip(),
+            title=str(project.title).strip(),
             start_date=parse_date_value(project.start_date),
             end_date=parse_date_value(project.start_date),
             kind=str(project.proposal_type).strip(),
