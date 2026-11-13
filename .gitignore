@@ -10,7 +10,7 @@
 [Ll]ocal
 [Ss]cripts
 pyvenv.cfg
-.venv
+
 pip-selfcheck.json
 ### Python template
 # Byte-compiled / optimized / DLL files
@@ -98,6 +98,7 @@ celerybeat-schedule
 .env
 env/
 venv/
+.venv/
 ENV/
 env.bak/
 venv.bak/
@@ -116,9 +117,7 @@ venv.bak/
 .mypy_cache/
 
 # local
-local/*
-!local/__init__.py
-!local/settings.py.example
+local/
 .idea/
 /mxlive/static/bootstrap
 /docs/_build/
